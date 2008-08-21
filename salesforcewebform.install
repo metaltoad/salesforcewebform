@@ -1,0 +1,40 @@
+<?php
+
+function salesforcewebform_install() {
+  $success = FALSE;
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysqli':
+    case 'mysql':
+      $success = db_query("CREATE TABLE `salesforcewebform` (
+  			`vid` int(10) unsigned NOT NULL,
+  			`use` tinyint(1) NOT NULL default '0',
+  			PRIMARY KEY  (`vid`)
+			) ENGINE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */"
+      );
+      break;
+
+  case 'pgsql':
+ 	 $success = db_query("CREATE TABLE {salesforcewebform} (
+	    `vid` int_unsigned NOT NULL,
+		  `use` int_unsigned NOT NULL default '0',
+		  PRIMARY KEY  (vid)
+    	)"
+  	 );
+     break;
+  }
+
+  if ($success) {
+    drupal_set_message(t('SalesForce Webform module installed module tables successfully.'));
+  }
+  else {
+    drupal_set_message(t('The installation of SalesForce webform module was unsuccessful.'), 'error');
+  }
+}
+
+/**
+ * Remove tables on uninstall.
+ */
+function salesforcewebform_uninstall() {
+  db_query("DROP TABLE {salesforcewebform}");
+}
