@@ -203,11 +203,21 @@ function salesforcewebform_process($form_id, $form_values) {
 	$all_fields = array();
   $sid = empty($form_values['submitted_tree']['SIDKey']) ? _salesforcewebform_generate_sid() : $form_values['submitted_tree']['WebformSID__c'];
   $all_fields['OWNERID'] = $client->userId;
-  $fvs_keys = array_keys($form_values['submitted_tree']);
   
-  end($form_values['submitted']);
-  $websidkey = key($form_values['submitted']);
+  $submitted_keys = array_keys($form_values['submitted']);
+  $tree_keys = array_keys($form_values['submitted_tree']);
 
+  foreach($tree_keys as $keyid=>$keyval) {
+    if($keyval == "WebformSID__c") {
+      $treesidkey = $keyid;
+    }
+  }
+  foreach($submitted_keys as $keyid=>$keyval) {
+    if($keyid == $treesidkey) {
+      $websidkey = $keyval;
+    }
+  }
+  
   $all_fields['WebformSID__c'] = empty($form_values['submitted_tree']['WebformSID__c']) ? $form_values['details']['nid']."-".$sid : $form_values['submitted_tree']['WebformSID__c'];
   $form_values['submitted_tree']['WebformSID__c'] = $all_fields['WebformSID__c'];
   $form_values['submitted'][$websidkey] = $form_values['submitted_tree']['WebformSID__c'];
