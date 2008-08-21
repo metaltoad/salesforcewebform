@@ -1,3 +1,4 @@
+$Id$
 Requirements
 ------------
 Drupal 5.x, SalesForce.com account, PHP + SOAP enabled
@@ -39,16 +40,22 @@ Installation
 7. Create or edit a webform to match your lead form.  Under 'SalesForce Settings', select
    the 'Yes' option to post the form to SalesForce.
 
+   Under 'Webform Advanced Settings', add the following code for 'Additional Processing':
+
+	<?php
+	require_once(drupal_get_path('module', 'salesforcewebform') . '/salesforcewebform.module');
+	$form_values = salesforcewebform_process($form_id, $form_values);
+	?>
+
    For each component, you must select a SalesForce field to map to.  The default fields
    are listed for easy mapping.  Custom fields must be entered into the "Administer" ->
    "Site Configuration" -> "SalesForce Webform" screen.
 
    As the last entry in the Webform, add a hidden field 'SID Key'.  Select 'Webform SID Key'
-   as the SalesForce key to map to.
+   as the SalesForce key to map to.  It is very important that the SID Key be the LAST item in
+   the form.
 
    Save the webform.
 
 8. As your lead form is submitted (either new or edits), it will be posted via SOAP to 
    SalesForce automatically.
-
-$Id$

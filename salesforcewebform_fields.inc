@@ -1,6 +1,7 @@
 <?php
+// $Id$
 
-// available fields in SugarCRM 5.0.0d
+// available fields in SalesForce
 $salesforcewebform_available_fields = array(	
 	// names
 	'Title' => 'Title',

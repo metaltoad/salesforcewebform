@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 function salesforcewebform_install() {
   $success = FALSE;
@@ -6,7 +7,7 @@ function salesforcewebform_install() {
   switch ($GLOBALS['db_type']) {
     case 'mysqli':
     case 'mysql':
-      $success = db_query("CREATE TABLE `salesforcewebform` (
+      $success = db_query("CREATE TABLE {salesforcewebform} (
   			`vid` int(10) unsigned NOT NULL,
   			`use` tinyint(1) NOT NULL default '0',
   			PRIMARY KEY  (`vid`)
@@ -37,4 +38,7 @@ function salesforcewebform_install() {
  */
 function salesforcewebform_uninstall() {
   db_query("DROP TABLE {salesforcewebform}");
+	variable_del("salesforcewebform_user");
+	variable_del("salesforcewebform_pw");
+	variable_del("salesforcewebform_custom_fields");
 }
