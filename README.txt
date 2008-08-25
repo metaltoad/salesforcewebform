@@ -12,6 +12,11 @@ installed correctly.
 
 The SalesForce Webform module does require PHP with SOAP enabled.
 
+If you are having issues with blank screens or errors on form submissions,
+as a first troubleshooting step, make sure you have entered the correct
+username and password + Security Token combination on the administration
+page.
+
 This module was sponsored by by Davis Applied Technology College, 
 http://www.datc.edu.  The module was programmed by Obsidian Design LLP,
 http://www.obsidiandesign.com.
