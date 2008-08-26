@@ -222,9 +222,8 @@ function salesforcewebform_process($form_id, $form_values) {
   $form_values['submitted_tree']['WebformSID__c'] = $all_fields['WebformSID__c'];
   $form_values['submitted'][$websidkey] = $form_values['submitted_tree']['WebformSID__c'];
   $form_values['submission']->data[$websidkey]['value'][0] = $form_values['submitted_tree']['WebformSID__c'];    
-
   foreach($form_values['submitted_tree'] as $fkey=>$fvalue) {
-    if(!in_array($fkey, array('submitted', 'submission', 'details', 'op', 'submit', 'form_id', 'form_token', 'submitted_tree', 'oid', 'member_status', 'HasOptedOutOfEmail', 'DoNotCall', 'HasOptedOutOfFax', 'WebformSID__c')) && $fvalue) {
+    if((!in_array($fkey, array('submitted', 'submission', 'details', 'op', 'submit', 'form_id', 'form_token', 'submitted_tree', 'oid', 'member_status', 'HasOptedOutOfEmail', 'DoNotCall', 'HasOptedOutOfFax', 'WebformSID__c'))  && !is_numeric($fkey)) && $fvalue) {
       if(!is_array($fvalue)) {
         $all_fields[$fkey] = htmlspecialchars(stripslashes(strip_tags($fvalue)));
       }
@@ -325,6 +324,4 @@ function _salesforcewebform_generate_sid() {
   $sid = md5(uniqid(rand(), true));
   return substr($sid, 0, 8);
 }
-
-
 

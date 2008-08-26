@@ -3,6 +3,9 @@
 
 // available fields in SalesForce
 $salesforcewebform_available_fields = array(	
+	//Special Field to block Processing
+	0 => '--Do Not Map to SalesForce--',
+
 	// names
 	'Title' => 'Title',
 	'Salutation' => 'Salutation',
