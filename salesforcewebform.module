@@ -228,6 +228,7 @@ function salesforcewebform_process($form_id, $form_values) {
         $all_fields[$fkey] = htmlspecialchars(stripslashes(strip_tags($fvalue)));
       }
       else {
+        $fsubs = "";
         foreach($fvalue as $subkey=>$subvalue) {
           $fsubs .= $subvalue.";";
         }

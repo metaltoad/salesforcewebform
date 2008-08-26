@@ -41,7 +41,6 @@ $salesforcewebform_available_fields = array(
 	// extra
 	'Birthdate' => 'Birthdate',
 	'Description' => 'Description',
-	'Lead_source' => 'Lead Source',
 	'Industry' => 'Industry',
 	'Rating' => 'Rating',
 	'AnnualRevenue' => 'Annual Revenue',
