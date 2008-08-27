@@ -60,11 +60,16 @@ function salesforcewebform_form_alter($form_id, &$form) {
  		// if the user has specified the SalesForce action, then we will be posting the form to SalesForce
 		if ( !empty($form['#parameters'][1]->use_salesforce) ) {
 	    include_once(drupal_get_path('module', 'salesforcewebform') . "/salesforcewebform_fields.inc");
+		  foreach($salesforcewebform_available_fields as $sfwafkey=>$sfwafvalue) {
+			$sfwafkey = strtolower($sfwafkey);
+			$sfwaf_array[$sfwafkey] = $sfwafvalue;
+		  }
+		  $valid_fields = array_merge($sfwaf_array, salesforcewebform_load_custom_fields('webform'));
 		  $new_form_key = array(
 				'#type' => 'select',
 				'#title' => t('SalesForce Field Key'),
 				'#multiple' => FALSE,
-				'#options' => array_merge($salesforcewebform_available_fields, salesforcewebform_load_custom_fields()),
+				'#options' => $valid_fields,
 				'#description' => t('Select a SalesForce field that this form field will map to.  If you switch the form to an email for this will be used as the machine readable key.'),
 				'#weight' => $form['field']['form_key']['#weight'],
 				'#default_value' => empty($form['#parameters'][2]['form_key']) ? '' : $form['#parameters'][2]['form_key'],
@@ -190,40 +195,45 @@ function salesforcewebform_process($form_id, $form_values) {
 	//Ok, now use SOAP to send the information to SalesForce
 	require_once (drupal_get_path('module', 'salesforcewebform') . '/includes/soapclient/SforcePartnerClient.php');
 	require_once (drupal_get_path('module', 'salesforcewebform') . '/includes/soapclient/SforceHeaderOptions.php');
+	include_once(drupal_get_path('module', 'salesforcewebform') . "/salesforcewebform_fields.inc");
 	
 	// Salesforce Login information
 	$wsdl = drupal_get_path('module', 'salesforcewebform') . '/includes/soapclient/partner.wsdl.xml';
 	$userName = variable_get('salesforcewebform_user', NULL);
 	$password = variable_get('salesforcewebform_pw', NULL);
-
+	
 	// Process of logging on and getting a salesforce.com session
 	$client = new SforcePartnerClient();
 	$client->createConnection($wsdl);
 	$loginResult = $client->login($userName, $password);
 	$all_fields = array();
+	$master_fields = $salesforcewebform_available_fields;
+	$submission = array();
+	foreach($master_fields as $mkey => $mvalue) {
+		if(array_key_exists(strtolower($mkey), $form_values['submitted_tree'])) {
+			$submission[$mkey] = $form_values['submitted_tree'][strtolower($mkey)];
+		}
+  }
+
   $sid = empty($form_values['submitted_tree']['SIDKey']) ? _salesforcewebform_generate_sid() : $form_values['submitted_tree']['WebformSID__c'];
   $all_fields['OWNERID'] = $client->userId;
   
-  $submitted_keys = array_keys($form_values['submitted']);
-  $tree_keys = array_keys($form_values['submitted_tree']);
+  $submitted = $form_values['submitted'];
+  foreach($submission as $keyid=>$keyval) {
+    foreach($submitted as $skeyid=>$skeyval) {
+    	if($keyval == $skeyval && $keyval = "WebformSID__c") {
+      $websidkey = $skeyid;
+    	}
+    }
+  }
 
-  foreach($tree_keys as $keyid=>$keyval) {
-    if($keyval == "WebformSID__c") {
-      $treesidkey = $keyid;
-    }
-  }
-  foreach($submitted_keys as $keyid=>$keyval) {
-    if($keyid == $treesidkey) {
-      $websidkey = $keyval;
-    }
-  }
-  
   $all_fields['WebformSID__c'] = empty($form_values['submitted_tree']['WebformSID__c']) ? $form_values['details']['nid']."-".$sid : $form_values['submitted_tree']['WebformSID__c'];
   $form_values['submitted_tree']['WebformSID__c'] = $all_fields['WebformSID__c'];
-  $form_values['submitted'][$websidkey] = $form_values['submitted_tree']['WebformSID__c'];
-  $form_values['submission']->data[$websidkey]['value'][0] = $form_values['submitted_tree']['WebformSID__c'];    
-  foreach($form_values['submitted_tree'] as $fkey=>$fvalue) {
-    if((!in_array($fkey, array('submitted', 'submission', 'details', 'op', 'submit', 'form_id', 'form_token', 'submitted_tree', 'oid', 'member_status', 'HasOptedOutOfEmail', 'DoNotCall', 'HasOptedOutOfFax', 'WebformSID__c'))  && !is_numeric($fkey)) && $fvalue) {
+  $form_values['submitted'][$websidkey] = $all_fields['WebformSID__c'];
+  $form_values['submission']->data[$websidkey]['value'][0] = $all_fields['WebformSID__c']; 
+
+  foreach($submission as $fkey=>$fvalue) {
+    if((!in_array($fkey, array('DoNotCall', 'HasOptedOutOfEmail', 'HasOptedOutOfFax', 'submitted', 'submission', 'details', 'op', 'submit', 'form_id', 'form_token', 'submitted_tree', 'WebformSID__c'))  && !is_numeric($fkey)) && $fvalue) {
       if(!is_array($fvalue)) {
         $all_fields[$fkey] = htmlspecialchars(stripslashes(strip_tags($fvalue)));
       }
@@ -258,7 +268,6 @@ function salesforcewebform_process($form_id, $form_values) {
       $accounts_updated = $accounts_updated + $success[1];
       $accounts_failed =  $accounts_failed + $success[2];
   }
-
   $total_record_count = $total_record_count + $record_count;
 
   return $form_values;
@@ -276,6 +285,7 @@ function _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $
         $k = 0;
 
         // This loop processes $result to build the log files
+ 
         foreach ($results as $result)
         {
             // Build string from fields in $sObjects array

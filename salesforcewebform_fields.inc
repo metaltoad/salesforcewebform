@@ -52,8 +52,19 @@ $salesforcewebform_available_fields = array(
 	
 );
 
-function salesforcewebform_load_custom_fields () {
+function salesforcewebform_load_custom_fields ($loadtype) {
 	$custom_fields = variable_get('salesforcewebform_custom_fields', null);
-	if ( is_array($custom_fields) ) return $custom_fields ;
+	if ( is_array($custom_fields) ) {
+    if($loadtype == "webform") {
+      foreach( $custom_fields as $cfkey=>$cfvalue) {
+        $cfkey = strtolower($cfkey);
+        $return_fields[$cfkey] = $cfvalue;
+      }
+    }
+    else {
+      $return_fields = $custom_fields;
+    }
+    return $return_fields ;
+  }
 	else return array();
 }
