@@ -21,7 +21,7 @@ $salesforcewebform_available_fields = array(
 	// lead  info for SalesForce
 	'AccountName' => 'Account Name',
 	'Description' => 'Description',
-	'LeadSource' => 'Lead Source Description',
+	'LeadSource' => 'Lead Source',
 	'ReferredBy' => 'Referred By',
 	
 	// phone numbers
@@ -53,7 +53,8 @@ $salesforcewebform_available_fields = array(
 );
 
 function salesforcewebform_load_custom_fields ($loadtype) {
-	$custom_fields = variable_get('salesforcewebform_custom_fields', null);
+	$custom_fields = variable_get('salesforcewebform_custom_fields', array());
+	$return_fields = array();
 	if ( is_array($custom_fields) ) {
     if($loadtype == "webform") {
       foreach( $custom_fields as $cfkey=>$cfvalue) {
