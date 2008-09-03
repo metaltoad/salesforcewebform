@@ -206,6 +206,7 @@ function salesforcewebform_process($form_id, $form_values) {
 	$client = new SforcePartnerClient();
 	$client->createConnection($wsdl);
 	$loginResult = $client->login($userName, $password);
+
 	$all_fields = array();
 	$master_fields = array_merge($salesforcewebform_available_fields, salesforcewebform_load_custom_fields(NULL));
 	$submission = array();
@@ -215,7 +216,7 @@ function salesforcewebform_process($form_id, $form_values) {
 		}
   }
 
-  $sid = empty($form_values['submitted_tree']['webformsid__c']) ? _salesforcewebform_generate_sid() : $form_values['submitted_tree']['webformsid__c'];
+  $sid = empty($form_values['submitted_tree']['WebformSID__c']) ? _salesforcewebform_generate_sid() : $form_values['submitted_tree']['WebformSID__c'];
   $all_fields['OWNERID'] = $client->userId;
   $submitted = $form_values['submitted'];
   foreach($submission as $keyid=>$keyval) {
@@ -226,11 +227,12 @@ function salesforcewebform_process($form_id, $form_values) {
     }
   }
 
-  $all_fields['WebformSID__c'] = empty($form_values['submitted_tree']['webformsid__c']) ? $form_values['details']['nid']."-".$sid : $form_values['submitted_tree']['webformsid__c'];
+  $all_fields['WebformSID__c'] = empty($submission['webformsid__c']) ? $form_values['details']['nid']."-".$sid : $submission['webformsid__c'];
   $form_values['submitted_tree']['WebformSID__c'] = $all_fields['WebformSID__c'];
   $form_values['submitted'][$websidkey] = $all_fields['WebformSID__c'];
-  $form_values['submission']->data[$websidkey]['value'][0] = $all_fields['WebformSID__c']; 
-
+  if(isset($form_values['submission'])) {
+    $form_values['submission']->data[$websidkey]['value'][0] = $all_fields['WebformSID__c']; 
+  }
   foreach($submission as $fkey=>$fvalue) {
     if((!in_array($fkey, array('DoNotCall', 'HasOptedOutOfEmail', 'HasOptedOutOfFax', 'submitted', 'submission', 'details', 'op', 'submit', 'form_id', 'form_token', 'submitted_tree', 'WebformSID__c'))  && !is_numeric($fkey)) && $fvalue) {
       if(!is_array($fvalue)) {
@@ -259,7 +261,6 @@ function salesforcewebform_process($form_id, $form_values) {
   // $file_created = accounts which are inserted
   // $file_failed =  accounts which failed
   $success = _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $file_created, $file_failed);
-
   // Update the overall counts
   if (is_array($success))
   {
@@ -284,7 +285,6 @@ function _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $
         $k = 0;
 
         // This loop processes $result to build the log files
- 
         foreach ($results as $result)
         {
             // Build string from fields in $sObjects array
