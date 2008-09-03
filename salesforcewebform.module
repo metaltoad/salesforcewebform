@@ -219,9 +219,10 @@ function salesforcewebform_process($form_id, $form_values) {
   $sid = empty($form_values['submitted_tree']['WebformSID__c']) ? _salesforcewebform_generate_sid() : $form_values['submitted_tree']['WebformSID__c'];
   $all_fields['OWNERID'] = $client->userId;
   $submitted = $form_values['submitted'];
+  
   foreach($submission as $keyid=>$keyval) {
     foreach($submitted as $skeyid=>$skeyval) {
-    	if($keyval == $skeyval && $keyid == "webformsid__c") {
+    	if($keyval == $skeyval && $keyid == "WebformSID__c") {
       $websidkey = $skeyid;
     	}
     }
