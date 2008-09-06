@@ -17,7 +17,7 @@ function salesforcewebform_form_alter($form_id, &$form) {
 		global $base_url;
 		$node = $form['#parameters'][1];
 				
-		// only deal with this form if it is supposed to go to sugar
+		// only deal with this form if it is supposed to go to SalesForce
 		if ( empty($node->use_salesforce) ) {
 			return ;
 		}
@@ -49,7 +49,7 @@ function salesforcewebform_form_alter($form_id, &$form) {
 		  );
 		  /* End SalesForce settings form */
 
-		  // integrate the sugar form into the form
+		  // integrate the SalesForce form into the form
 		  $pos = array_search('mailsettings', array_keys($form)) + 1;
 		  $form = array_merge(array_slice($form, 0, $pos), $salesforce_form, array_slice($form, $pos));
 	
@@ -146,19 +146,22 @@ function salesforcewebform_admin_settings() {
     '#rows' => 5,
     '#weight' => -2,
   );
-	$form['field_settings']['salesforcewebform_user'] = array(
+	$form['login']['salesforcewebform_user'] = array(
 	    '#type' => 'textfield',
 	    '#title' => t('SalesForce User'),
-	    '#default_value' => variable_get('salesforcewebform_user', null),
 	    '#description' => t('The user on the SalesForce System that will post the data to SalesForce.'),
 	);
 	
-	$form['field_settings']['salesforcewebform_pw'] = array(
+	$form['login']['salesforcewebform_pw'] = array(
 	    '#type' => 'password',
 	    '#title' => t('SalesForce Password'),
-	    '#default_value' => variable_get('salesforcewebform_pw', null),
 	    '#description' => t('The password of the user on the SalesForce System the form uses to connect.  Note: the password must be entered as mypasswordXXXXXXXXX, where XXXXXXXXX is your API Security Token from SalesForce.  Additionally, your password will not be displayed here once it is entered, for security purposes.  If you need to change it, please re-enter it.'),
 	); 
+	$form['login']['salesforcewebform_change_login'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Change Login Information'),
+    '#description' => t('Check this to override the current login information with the entered values.')
+  );
 	$form['#validate'] = array ('parse_custom_field_spec' => $form);
 	return system_settings_form($form); 
 }
@@ -174,6 +177,10 @@ function parse_custom_field_spec ($form_id, $form_values, $form) {
 			$custom_fields[$new_field[0]] = $new_field[1];
 		}
 	}
+	if ( $form_values['salesforcewebform_change_login'] === 0 ) {
+    form_set_value($form['login']['salesforcewebform_user'], variable_get('salesforcewebform_user', NULL));
+    form_set_value($form['login']['salesforcewebform_pw'], variable_get('salesforcewebform_pw', NULL));
+  }
 	form_set_value($form['field_settings']['salesforcewebform_custom_fields'], $custom_fields);
 }
 
