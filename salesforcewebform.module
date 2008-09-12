@@ -238,7 +238,6 @@ function salesforcewebform_process($form_id, $form_values) {
   $all_fields['WebformSID__c'] = empty($submission['webformsid__c']) ? $form_values['details']['nid']."-".$sid : $submission['webformsid__c'];
   $form_values['submitted_tree']['WebformSID__c'] = $all_fields['WebformSID__c'];
   $form_values['submitted'][$websidkey] = $all_fields['WebformSID__c'];
-  unset($form_values['submitted_tree']['webformsid__c']);
   if(isset($form_values['submission'])) {
     $form_values['submission']->data[$websidkey]['value'][0] = $all_fields['WebformSID__c']; 
   }
@@ -279,6 +278,9 @@ function salesforcewebform_process($form_id, $form_values) {
   }
   $total_record_count = $total_record_count + $record_count;
 
+  $form_values['submitted_tree']['webformsid__c'] = $form_values['submitted_tree']['WebformSID__c'];
+  unset($form_values['submitted_tree']['WebformSID__c']);
+  
   return $form_values;
 }
 
