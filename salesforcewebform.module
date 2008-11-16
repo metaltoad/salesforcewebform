@@ -85,11 +85,11 @@ function salesforcewebform_form_alter($form_id, &$form) {
  */
 function salesforcewebform_nodeapi(&$node, $op, $form = NULL, $page = NULL) {	
 	if ( $node->type == 'webform') {
-
 		switch ($op) {
 			case 'insert':
 			case 'update':
-				if ( !empty($node->use_salesforce) ) {
+			case 'submit':
+        if ( isset($node->use_salesforce) ) {
 					// store the SalesForce fields
 					$result = db_query("DELETE FROM {salesforcewebform} where `vid` = %d", $node->vid);
 					$result = db_query("INSERT INTO {salesforcewebform} (`vid`, `use`) " .
