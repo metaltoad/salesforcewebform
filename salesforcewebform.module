@@ -58,7 +58,7 @@ function salesforcewebform_form_alter($form_id, &$form) {
 	// handle editing fields on the webform
 	elseif ( $form_id == 'webform_component_edit_form' ) {
  		// if the user has specified the SalesForce action, then we will be posting the form to SalesForce
-		if ( !empty($form['#parameters'][1]->use_salesforce) ) {
+		if ( isset($form['#parameters'][1]->use_salesforce) ) {
 	    include_once(drupal_get_path('module', 'salesforcewebform') . "/salesforcewebform_fields.inc");
 		  foreach($salesforcewebform_available_fields as $sfwafkey=>$sfwafvalue) {
 			$sfwafkey = strtolower($sfwafkey);
@@ -85,11 +85,11 @@ function salesforcewebform_form_alter($form_id, &$form) {
  */
 function salesforcewebform_nodeapi(&$node, $op, $form = NULL, $page = NULL) {	
 	if ( $node->type == 'webform') {
+
 		switch ($op) {
 			case 'insert':
 			case 'update':
-			case 'submit':
-        if ( isset($node->use_salesforce) ) {
+				if ( isset($node->use_salesforce) ) {
 					// store the SalesForce fields
 					$result = db_query("DELETE FROM {salesforcewebform} where `vid` = %d", $node->vid);
 					$result = db_query("INSERT INTO {salesforcewebform} (`vid`, `use`) " .
@@ -133,6 +133,18 @@ function salesforcewebform_menu() {
 }
 
 function salesforcewebform_admin_settings() {
+  $bpath = (base_path() != "/") ? base_path() : NULL;
+  
+	$form['salesforcewebform_toolkit_path'] = array(
+    '#type' => 'textfield',
+    '#size' => 80,
+    '#title' => t('Path to Salesforce PHP Toolkit'),
+    '#default_value' => variable_get('salesforcewebform_toolkit_path', $bpath . drupal_get_path('module', 'salesforcewebform') . "/includes"),
+    '#description' => t('Enter the path to the Salesforce PHP Toolkit, which must be downloaded separately from ' . l('the Salesforce site', 'http://wiki.apexdevnet.com/index.php/Web_Services_API#PHP') .'.  Enter the path relative to the Drupal installation root.'),
+    '#maxlength' => 255,
+    '#weight' => -1,
+  );
+  
 	$form['field_settings'] = array(
 		'#type' => 'fieldset',
 		'#title' => t('SalesForce custom field settings'),
@@ -182,6 +194,7 @@ function parse_custom_field_spec ($form_id, $form_values, $form) {
     form_set_value($form['login']['salesforcewebform_pw'], variable_get('salesforcewebform_pw', NULL));
   }
 	form_set_value($form['field_settings']['salesforcewebform_custom_fields'], $custom_fields);
+	form_set_value($form['salesforcewebform_toolkit_path'], $form_values['salesforcewebform_toolkit_path']);
 }
 
 function create_custom_field_spec ($custom_fields) {
@@ -199,13 +212,17 @@ function create_custom_field_spec ($custom_fields) {
 
 function salesforcewebform_process($form_id, $form_values) {
 
+  //Get the path to the Toolkit, set in the options on install.
+  $bpath = (base_path() != "/") ? base_path() : NULL;
+  $toolkit_path = variable_get('salesforcewebform_toolkit_path', $bpath . drupal_get_path('module', 'salesforcewebform') . "/includes"); 
+  
 	//Ok, now use SOAP to send the information to SalesForce
-	require_once (drupal_get_path('module', 'salesforcewebform') . '/includes/soapclient/SforcePartnerClient.php');
-	require_once (drupal_get_path('module', 'salesforcewebform') . '/includes/soapclient/SforceHeaderOptions.php');
+	require_once ($toolkit_path . '/soapclient/SforcePartnerClient.php');
+	require_once ($toolkit_path . '/soapclient/SforceHeaderOptions.php');
 	include_once(drupal_get_path('module', 'salesforcewebform') . "/salesforcewebform_fields.inc");
 	
 	// Salesforce Login information
-	$wsdl = drupal_get_path('module', 'salesforcewebform') . '/includes/soapclient/partner.wsdl.xml';
+	$wsdl = $toolkit_path . '/soapclient/partner.wsdl.xml';
 	$userName = variable_get('salesforcewebform_user', NULL);
 	$password = variable_get('salesforcewebform_pw', NULL);
 	
