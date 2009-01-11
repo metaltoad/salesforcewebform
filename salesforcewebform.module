@@ -7,15 +7,14 @@ ini_set("soap.wsdl_cache_enabled", "0");
  * Allow for editing webforms with SalesForce connection information and modifying the
  * each webform to post to SalesForce.
  */
-function salesforcewebform_form_alter($form_id, &$form) {
-
+function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
 	// handle webform client forms (instances of webforms that are submitted)	
 	// webform names client forms with the pattern web_form_client_form_$nid, use this knowledge to
 	// manipulate the forms that webform displays
 	if ( ereg('^webform_client_form_', $form_id) ) {
 		
 		global $base_url;
-		$node = $form['#parameters'][1];
+		$node = $form['#parameters'][2];
 				
 		// only deal with this form if it is supposed to go to SalesForce
 		if ( empty($node->use_salesforce) ) {
@@ -58,9 +57,9 @@ function salesforcewebform_form_alter($form_id, &$form) {
 	// handle editing fields on the webform
 	elseif ( $form_id == 'webform_component_edit_form' ) {
  		// if the user has specified the SalesForce action, then we will be posting the form to SalesForce
-		if ( isset($form['#parameters'][1]->use_salesforce) ) {
-	    include_once(drupal_get_path('module', 'salesforcewebform') . "/salesforcewebform_fields.inc");
-		  foreach($salesforcewebform_available_fields as $sfwafkey=>$sfwafvalue) {
+		if ( isset($form['#parameters'][2]->use_salesforce) ) {
+	    module_load_include('inc', 'salesforcewebform', 'salesforcewebform_fields');
+		  foreach(salesforcewebform_available_fields() as $sfwafkey=>$sfwafvalue) {
 			$sfwafkey = strtolower($sfwafkey);
 			$sfwaf_array[$sfwafkey] = $sfwafvalue;
 		  }
@@ -72,7 +71,7 @@ function salesforcewebform_form_alter($form_id, &$form) {
 				'#options' => $valid_fields,
 				'#description' => t('Select a SalesForce field that this form field will map to.  If you switch the form to an email for this will be used as the machine readable key.'),
 				'#weight' => $form['field']['form_key']['#weight'],
-				'#default_value' => empty($form['#parameters'][2]['form_key']) ? '' : $form['#parameters'][2]['form_key'],
+				'#default_value' => empty($form['#parameters'][3]['form_key']) ? '' : $form['#parameters'][3]['form_key'],
 		  ); 
 		  $form['advanced']['form_key'] = $new_form_key;
 		  $form['advanced']['#collapsed'] = FALSE;
@@ -120,13 +119,12 @@ function salesforcewebform_nodeapi(&$node, $op, $form = NULL, $page = NULL) {
  * Add menu item for administering the module.
  */
 function salesforcewebform_menu() {
-	$items[] = array(
-		'path' => 'admin/settings/salesforcewebform',
-		'title' => t('SalesForce Webform'),
-		'description' => t('Configure SalesForce webform integration'),
-		'callback' => 'drupal_get_form',
-		'callback arguments' => array('salesforcewebform_admin_settings'),
-		'access' => user_access('access administration pages'),
+	$items['admin/settings/salesforcewebform'] = array(
+		'title' => 'SalesForce Webform',
+		'description' => 'Configure SalesForce webform integration',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('salesforcewebform_admin_settings'),
+		'access arguments' => array('access administration pages'),
 		'type' => MENU_NORMAL_ITEM
 	);
 	return $items;
@@ -190,11 +188,11 @@ function parse_custom_field_spec ($form_id, $form_values, $form) {
 		}
 	}
 	if ( $form_values['salesforcewebform_change_login'] === 0 ) {
-    form_set_value($form['login']['salesforcewebform_user'], variable_get('salesforcewebform_user', NULL));
-    form_set_value($form['login']['salesforcewebform_pw'], variable_get('salesforcewebform_pw', NULL));
+    form_set_value($form['login']['salesforcewebform_user'], variable_get('salesforcewebform_user', NULL), $form_state);
+    form_set_value($form['login']['salesforcewebform_pw'], variable_get('salesforcewebform_pw', NULL), $form_state);
   }
-	form_set_value($form['field_settings']['salesforcewebform_custom_fields'], $custom_fields);
-	form_set_value($form['salesforcewebform_toolkit_path'], $form_values['salesforcewebform_toolkit_path']);
+	form_set_value($form['field_settings']['salesforcewebform_custom_fields'], $custom_fields, $form_state);
+	form_set_value($form['salesforcewebform_toolkit_path'], $form_values['salesforcewebform_toolkit_path'], $form_state);
 }
 
 function create_custom_field_spec ($custom_fields) {
@@ -210,16 +208,17 @@ function create_custom_field_spec ($custom_fields) {
 	return $spec;
 }
 
-function salesforcewebform_process($form_id, $form_values) {
-
+function salesforcewebform_process($form, $form_state) {
+  $form_values = $form_state['values'];
+  
   //Get the path to the Toolkit, set in the options on install.
   $bpath = (base_path() != "/") ? base_path() : NULL;
   $toolkit_path = variable_get('salesforcewebform_toolkit_path', $bpath . drupal_get_path('module', 'salesforcewebform') . "/includes"); 
   
 	//Ok, now use SOAP to send the information to SalesForce
-	require_once ($toolkit_path . '/soapclient/SforcePartnerClient.php');
-	require_once ($toolkit_path . '/soapclient/SforceHeaderOptions.php');
-	include_once(drupal_get_path('module', 'salesforcewebform') . "/salesforcewebform_fields.inc");
+	require_once($toolkit_path .'/soapclient/SforcePartnerClient.php');
+	require_once($toolkit_path.'/soapclient/SforceHeaderOptions.php');
+	module_load_include('inc', 'salesforcewebform', '/salesforcewebform_fields');
 	
 	// Salesforce Login information
 	$wsdl = $toolkit_path . '/soapclient/partner.wsdl.xml';
@@ -232,15 +231,14 @@ function salesforcewebform_process($form_id, $form_values) {
 	$loginResult = $client->login($userName, $password);
 
 	$all_fields = array();
-	$master_fields = array_merge($salesforcewebform_available_fields, salesforcewebform_load_custom_fields(NULL));
+	$master_fields = array_merge(salesforcewebform_available_fields(), salesforcewebform_load_custom_fields(NULL));
 	$submission = array();
 	foreach($master_fields as $mkey => $mvalue) {
 		if(array_key_exists(strtolower($mkey), $form_values['submitted_tree'])) {
 			$submission[$mkey] = $form_values['submitted_tree'][strtolower($mkey)];
 		}
   }
-
-  $sid = empty($form_values['submitted_tree']['WebformSID__c']) ? _salesforcewebform_generate_sid() : $form_values['submitted_tree']['WebformSID__c'];
+  $sid = empty($form_values['submitted_tree']['webformsid__c']) ? _salesforcewebform_generate_sid() : $form_values['submitted_tree']['webformsid__c'];
   $all_fields['OWNERID'] = $client->userId;
   $submitted = $form_values['submitted'];
   
@@ -251,8 +249,7 @@ function salesforcewebform_process($form_id, $form_values) {
     	}
     }
   }
-
-  $all_fields['WebformSID__c'] = empty($submission['webformsid__c']) ? $form_values['details']['nid']."-".$sid : $submission['webformsid__c'];
+  $all_fields['WebformSID__c'] = empty($submission['WebformSID__c']) ? $form_values['details']['nid']."-".$sid : $submission['WebformSID__c'];
   $form_values['submitted_tree']['WebformSID__c'] = $all_fields['WebformSID__c'];
   $form_values['submitted'][$websidkey] = $all_fields['WebformSID__c'];
   if(isset($form_values['submission'])) {
@@ -298,7 +295,8 @@ function salesforcewebform_process($form_id, $form_values) {
   $form_values['submitted_tree']['webformsid__c'] = $form_values['submitted_tree']['WebformSID__c'];
   unset($form_values['submitted_tree']['WebformSID__c']);
   
-  return $form_values;
+  $form_state['values'] = $form_values;
+  return $form_state;
 }
 
 function _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $file_created, $file_failed)

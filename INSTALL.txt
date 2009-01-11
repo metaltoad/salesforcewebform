@@ -1,7 +1,7 @@
 $Id$
 Requirements
 ------------
-Drupal 5.x, SalesForce.com account, PHP + SOAP enabled
+Drupal 6.x, SalesForce.com account, PHP + SOAP enabled
 
 Installation
 ------------
@@ -44,7 +44,7 @@ Installation
 
 	<?php
 	require_once(drupal_get_path('module', 'salesforcewebform') . '/salesforcewebform.module');
-	$form_values = salesforcewebform_process($form_id, $form_values);
+	$form_state = salesforcewebform_process($form, $form_state);
 	?>
 
    For each component, you must select a SalesForce field to map to.  The default fields
