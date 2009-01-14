@@ -172,13 +172,13 @@ function salesforcewebform_admin_settings() {
     '#title' => t('Change Login Information'),
     '#description' => t('Check this to override the current login information with the entered values.')
   );
-	$form['#validate'] = array ('parse_custom_field_spec' => $form);
+	$form['#validate'][] = 'parse_custom_field_spec';
 	return system_settings_form($form); 
 }
 
-function parse_custom_field_spec ($form_id, $form_values, $form) {
+function parse_custom_field_spec ($form, &$form_state) {
 	$custom_fields = array();
-	$custom_field_spec = $form_values['salesforcewebform_custom_fields'];
+	$custom_field_spec = $form_state['values']['salesforcewebform_custom_fields'];
 	if ( !empty($custom_field_spec) ) {
 		$custom_field_tmp = explode("\n", $custom_field_spec);
 		foreach ( $custom_field_tmp as $field ) {
@@ -187,7 +187,7 @@ function parse_custom_field_spec ($form_id, $form_values, $form) {
 			$custom_fields[$new_field[0]] = $new_field[1];
 		}
 	}
-	if ( $form_values['salesforcewebform_change_login'] === 0 ) {
+	if ( $form_state['values']['salesforcewebform_change_login'] === 0 ) {
     form_set_value($form['login']['salesforcewebform_user'], variable_get('salesforcewebform_user', NULL), $form_state);
     form_set_value($form['login']['salesforcewebform_pw'], variable_get('salesforcewebform_pw', NULL), $form_state);
   }
