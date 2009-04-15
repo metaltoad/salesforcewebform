@@ -151,7 +151,7 @@ function salesforcewebform_admin_settings() {
 	$form['field_settings']['salesforcewebform_custom_fields'] = array(
     '#type' => 'textarea',
     '#title' => t("Custom Fields"),
-    '#default_value' => create_custom_field_spec(variable_get('salesforcewebform_custom_fields', null)),
+    '#default_value' => create_custom_field_spec(variable_get('salesforcewebform_custom_fields', array())),
     '#description' => t('A list of additional fields configured for leads on your instances of SalesForce. One field per line, with field name and description seperated by pipes. i.e. safe_key|Some readable option'),
     '#rows' => 5,
     '#weight' => -2,
@@ -209,6 +209,7 @@ function create_custom_field_spec ($custom_fields) {
 }
 
 function salesforcewebform_process($form, $form_state) {
+
   $form_values = $form_state['values'];
   
   //Get the path to the Toolkit, set in the options on install.
@@ -249,6 +250,7 @@ function salesforcewebform_process($form, $form_state) {
     	}
     }
   }
+
   $all_fields['WebformSID__c'] = empty($submission['WebformSID__c']) ? $form_values['details']['nid']."-".$sid : $submission['WebformSID__c'];
   $form_values['submitted_tree']['WebformSID__c'] = $all_fields['WebformSID__c'];
   $form_values['submitted'][$websidkey] = $all_fields['WebformSID__c'];
@@ -283,6 +285,7 @@ function salesforcewebform_process($form, $form_state) {
   // $file_created = accounts which are inserted
   // $file_failed =  accounts which failed
   $success = _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $file_created, $file_failed);
+
   // Update the overall counts
   if (is_array($success))
   {
@@ -294,8 +297,8 @@ function salesforcewebform_process($form, $form_state) {
 
   $form_values['submitted_tree']['webformsid__c'] = $form_values['submitted_tree']['WebformSID__c'];
   unset($form_values['submitted_tree']['WebformSID__c']);
-  
   $form_state['values'] = $form_values;
+
   return $form_state;
 }
 
@@ -309,7 +312,6 @@ function _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $
         // The upsert process
         $results = $client->upsert("WebformSID__c", $sObjects);
         $k = 0;
-
         // This loop processes $result to build the log files
         foreach ($results as $result)
         {
@@ -317,8 +319,7 @@ function _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $
             // At this point, the record has already been upserted
             // We just need the data for the log file
             // The string is the same, regardless of the result
-            $data2 = $sObjects[$k]->fields['NAME'] . ", " . $sObjects[$k]->fields[
-                'SA_ID__C'];
+            $data2 = $sObjects[$k]->fields['NAME'] . ", " . $sObjects[$k]->fields['SA_ID__C'];
 
             if ($result->success)
             {
