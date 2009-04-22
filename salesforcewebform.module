@@ -57,7 +57,7 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
 	// handle editing fields on the webform
 	elseif ( $form_id == 'webform_component_edit_form' ) {
  		// if the user has specified the SalesForce action, then we will be posting the form to SalesForce
-		if ( isset($form['#parameters'][2]->use_salesforce) ) {
+		if ( $form['#parameters'][2]->use_salesforce == 1 ) {
 	    module_load_include('inc', 'salesforcewebform', 'salesforcewebform_fields');
 		  foreach(salesforcewebform_available_fields() as $sfwafkey=>$sfwafvalue) {
 			$sfwafkey = strtolower($sfwafkey);
@@ -192,7 +192,7 @@ function parse_custom_field_spec ($form, &$form_state) {
     form_set_value($form['login']['salesforcewebform_pw'], variable_get('salesforcewebform_pw', NULL), $form_state);
   }
 	form_set_value($form['field_settings']['salesforcewebform_custom_fields'], $custom_fields, $form_state);
-	form_set_value($form['salesforcewebform_toolkit_path'], $form_values['salesforcewebform_toolkit_path'], $form_state);
+	form_set_value($form['salesforcewebform_toolkit_path'], $form_state['values']['salesforcewebform_toolkit_path'], $form_state);
 }
 
 function create_custom_field_spec ($custom_fields) {

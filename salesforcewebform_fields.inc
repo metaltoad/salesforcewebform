@@ -20,10 +20,10 @@ function salesforcewebform_available_fields() {
     'Website' => 'Website',
     
     // lead  info for SalesForce
-    'AccountName' => 'Account Name',
     'Description' => 'Description',
     'LeadSource' => 'Lead Source',
     'ReferredBy' => 'Referred By',
+    'RecordType' => 'Lead Record Type',
     
     // phone numbers
     'Phone' => 'Phone', 
