@@ -7,44 +7,52 @@ Installation
 ------------
 1. Copy the salesforcewebform directory to the Drupal modules directory for your site
 
-2. Download the latest version of the SalesForce PHP Toolkit (Version 11 at the time of
+2. Download the latest version of the SalesForce PHP Toolkit (Version 13.1 at the time of
    writing) from http://wiki.apexdevnet.com/index.php/Web_Services_API#PHP under
    'Toolkits'.
 
-3. Unzip the toolkit into the salesforcewebform/includes directory.
+3. Unzip the contents of the toolkit's phptoolkit-13_1 folder into the salesforcewebform/includes directory.
 
 4. Login as an administrator. Enable the module in the "Administer" -> "Build" -> "Modules"
 
 5. Go to "Administer" -> "site configuration" -> "SalesForce Webform"
-
-   If you have custom fields defined in your lead form, enter them into the 'Custom Fields'
-   box.  Enter in the format key|description.  To find the correct key name, in your
-   SalesForce.com page, go to "Setup" -> "App Setup" -> "Customize" -> "Leads" -> "Fields".
-   Select the field, and note the "API Field Name".  That is the key you need to list on
-   the Custom Fields page.
+  
+   In the 'Path to Salesforce PHP Toolkit' textfield,  enter the absolute path to the 
+   phptoolkit folder that you've uploaded.
+   
+   If you have custom fields defined in your object (Account, Contact, or Lead) form, 
+   enter them into the 'Custom Fields' box.  Enter in the format key|description.  To find
+   the correct key name, in your SalesForce.com page, go to "Setup" -> "App Setup" -> 
+   "Customize" -> "Leads" -> "Fields".  Select the field, and note the "API Field Name".  
+   That is the key you need to list on the Custom Fields page.
 
    Enter a valid SalesForce username.
 
    Enter the corresponding password + API Security token, in the form passwordXXXXXXXX,
    where 'password' is the account password and xxxxxxxx is the API Security Token.
+   
+   Make sure to check the 'Change Login Information' box so that the login information is
+   stored in the database.
 
    Save the configuration.  Note that the password will not display (for security reasons),
-   but is stored in the database.  If you change the custom fields, you will need to reenter
-   the password + API Security Token.
+   but is stored in the database.
 
 6. In your SalesForce.com screen, add a new custom field 'WebformSID'.  Select that it is
    a Unique Field and an External ID.  It is very important to add this field, as it
-   maps each Webform submission to a lead in SalesForce, and allows edits of the Webform
-   submission to not create a duplicate lead; instead, the existing lead is updated.
+   maps each Webform submission to an object in SalesForce, and allows edits of the Webform
+   submission to not create a duplicate object; instead, the existing object is updated.
 
-7. Create or edit a webform to match your lead form.  Under 'SalesForce Settings', select
+7. Create or edit a webform to match your object form.  Under 'SalesForce Settings', select
    the 'Yes' option to post the form to SalesForce.
 
+   Make sure that, at a minimum, that your webform contains the minimum required fields from
+   the Salesforce Account, Contact, or Lead form.
+   
    Under 'Webform Advanced Settings', add the following code for 'Additional Processing':
 
 	<?php
 	require_once(drupal_get_path('module', 'salesforcewebform') . '/salesforcewebform.module');
-	$form_state = salesforcewebform_process($form, $form_state);
+	$form_state = salesforcewebform_process($node, $form, $form_state);
 	?>
 
    For each component, you must select a SalesForce field to map to.  The default fields
@@ -57,5 +65,5 @@ Installation
 
    Save the webform.
 
-8. As your lead form is submitted (either new or edits), it will be posted via SOAP to 
+8. As your object form is submitted (either new or edits), it will be posted via SOAP to 
    SalesForce automatically.

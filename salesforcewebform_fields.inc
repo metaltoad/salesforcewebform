@@ -6,51 +6,60 @@ function salesforcewebform_available_fields() {
   return array(	
     //Special Field to block Processing
     0 => '--Do Not Map to SalesForce--',
+    
+    //Common fields for all form types
+    'Common Fields' => array(
+      'FirstName' => 'First Name',
+      'LastName' => 'Last Name*',
+      'Website' => 'Website',
+      'Fax' => 'Fax',
+      'Email' => 'Email',
+      'RecordTypeID' => 'Record Type',
+      'LeadSource' => 'Lead Source',      
+      'WebformSID__c' => 'Webform SID Key',
+    ),
 
-    // names
-    'Title' => 'Title',
-    'Salutation' => 'Salutation',
-    'FirstName' => 'First Name',
-    'LastName' => 'Last Name',
-    'Company' => 'Company',
-      
-    // email addresses and website
-    'Email' => 'Email',
-    'HasOptedOutOfEmail' => 'E-Mail Opt Out',
-    'Website' => 'Website',
+    // Lead
+    'Lead Fields' => array(
+      'Phone' => 'Phone',
+      'OwnerId' => 'Owner ID',
+      'MobilePhone' => 'Mobile',
+      'City' => 'City',
+      'PostalCode' => 'Postal Code',
+      'Country' => 'Country',    
+      'Company' => 'Company',
+    ),
     
-    // lead  info for SalesForce
-    'Description' => 'Description',
-    'LeadSource' => 'Lead Source',
-    'ReferredBy' => 'Referred By',
-    'RecordType' => 'Lead Record Type',
+    //Contact settings
+    'Contact Fields' => array(
+      'HomePhone' => 'Home Phone',
+      'MobilePhone' => 'Mobile',
+      'MailingCity' => 'City',
+      'MailingPostalCode' => 'Postal Code',
+      'MailingCountry' => 'Country',
+      'ContactOwner' => 'Contact Owner',
+    ),
     
-    // phone numbers
-    'Phone' => 'Phone', 
-    'MobilePhone' => 'Mobile',
-    'Fax' => 'Fax',
-    'DoNotCall' => 'Do Not Call',
-    'HasOptedOutOfFax' => 'Fax Opt Out',
+    //Account settings
+    'Account Fields' => array(
+      'AccountOwner' => 'Account Owner',
+      'Name' => 'Name*',
+      'Phone' => 'Phone',
+      'OwnerId' => 'Owner ID',
+      'BillingCity' => 'City',
+      'BillingPostalCode' => 'Postal Code',
+      'BillingCountry' => 'Country',
+    ),
     
-    // adddresses
-    'City' => 'City',
-    'Country' => 'Country',
-    'PostalCode' => 'Zip',
-    'State' => 'State/Province',
-    'Street' => 'Address',
-
-    // extra
-    'Birthdate' => 'Birthdate',
-    'Description' => 'Description',
-    'Industry' => 'Industry',
-    'Rating' => 'Rating',
-    'AnnualRevenue' => 'Annual Revenue',
-    'NumberOfEmployees' => 'Employees',
-    'Campaign' => 'Campaign_ID',
-    
-    //Special SID Field to map for editing
-    'WebformSID__c' => 'Webform SID Key',
-	
+    //Person Account fields
+    'Person Account Fields' => array(
+      'PersonEmail' => 'Email',
+      'PersonHomePhone' => 'Home Phone',
+      'PersonMobilePhone' => 'Mobile',
+      'PersonMailingCity' => 'City',
+      'PersonPostalCode' => 'Postal Code',
+      'PersonMailingCountry' => 'Country',
+    ),
   );
 }
 

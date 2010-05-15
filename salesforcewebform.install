@@ -21,6 +21,13 @@ function salesforcewebform_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'object' => array(
+        'description' => t('TODO'),
+        'type' => 'char',
+        'length' => '1',
+        'not null' => TRUE,
+        'default' => 'l',
+      ),
     ),
     'primary key' => array('vid'),
   );
@@ -60,4 +67,26 @@ function salesforcewebform_uninstall() {
 	variable_del("salesforcewebform_user");
 	variable_del("salesforcewebform_pw");
 	variable_del("salesforcewebform_custom_fields");
+	variable_del("salesforcewebform_toolkit_path");
+	
 }
+
+/**
+ * Update databse to allow object type selection
+ */
+function salesforcewebform_update_6001() {
+  $ret = array();
+  switch ($GLOBALS['db_type']) {
+    case 'mysqli':
+    case 'mysql':
+      $ret[] = update_sql("ALTER TABLE {salesforcewebform} ADD COLUMN
+object char(1) NOT NULL default 'l'");
+      break;
+    case 'pgsql':
+      db_add_column($ret, 'salesforce', 'description',
+'char(1)', array('default' => 'l', 'not null' => TRUE));
+      break;
+  }
+  return $ret;
+}
+ 
