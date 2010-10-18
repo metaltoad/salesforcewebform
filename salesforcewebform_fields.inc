@@ -1,68 +1,6 @@
 <?php
 // $Id$
 
-// available fields in SalesForce
-function salesforcewebform_available_fields() {
-  return array(	
-    //Special Field to block Processing
-    0 => '--Do Not Map to SalesForce--',
-    
-    //Common fields for all form types
-    'Common Fields' => array(
-      'FirstName' => 'First Name',
-      'LastName' => 'Last Name*',
-      'Website' => 'Website',
-      'Fax' => 'Fax',
-      'Email' => 'Email',
-      'RecordTypeID' => 'Record Type',
-      'LeadSource' => 'Lead Source',      
-      'WebformSID__c' => 'Webform SID Key',
-    ),
-
-    // Lead
-    'Lead Fields' => array(
-      'Phone' => 'Phone',
-      'OwnerId' => 'Owner ID',
-      'MobilePhone' => 'Mobile',
-      'City' => 'City',
-      'PostalCode' => 'Postal Code',
-      'Country' => 'Country',    
-      'Company' => 'Company',
-    ),
-    
-    //Contact settings
-    'Contact Fields' => array(
-      'HomePhone' => 'Home Phone',
-      'MobilePhone' => 'Mobile',
-      'MailingCity' => 'City',
-      'MailingPostalCode' => 'Postal Code',
-      'MailingCountry' => 'Country',
-      'ContactOwner' => 'Contact Owner',
-    ),
-    
-    //Account settings
-    'Account Fields' => array(
-      'AccountOwner' => 'Account Owner',
-      'Name' => 'Name*',
-      'Phone' => 'Phone',
-      'OwnerId' => 'Owner ID',
-      'BillingCity' => 'City',
-      'BillingPostalCode' => 'Postal Code',
-      'BillingCountry' => 'Country',
-    ),
-    
-    //Person Account fields
-    'Person Account Fields' => array(
-      'PersonEmail' => 'Email',
-      'PersonHomePhone' => 'Home Phone',
-      'PersonMobilePhone' => 'Mobile',
-      'PersonMailingCity' => 'City',
-      'PersonPostalCode' => 'Postal Code',
-      'PersonMailingCountry' => 'Country',
-    ),
-  );
-}
-
 function salesforcewebform_load_custom_fields ($loadtype) {
 	$custom_fields = variable_get('salesforcewebform_custom_fields', array());
 	$return_fields = array();
@@ -79,4 +17,18 @@ function salesforcewebform_load_custom_fields ($loadtype) {
     return $return_fields ;
   }
 	else return array();
+}
+
+
+// available fields in SalesForce
+function salesforcewebform_available_fields() {
+   $fields = array(    
+    //Special Field to block Processing
+    0 => '--Do Not Map to SalesForce--',
+    );
+
+  //Define Implementation for hook_salesforcewebform_fields
+  $fields = array_merge($fields, module_invoke_all('salesforcewebform_fields'));
+
+  return $fields;
 }

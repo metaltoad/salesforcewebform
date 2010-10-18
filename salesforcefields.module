@@ -1,0 +1,128 @@
+<?php
+// $Id$
+
+function salesforcefields_salesforcewebform_fields()
+{
+   $real_fields = salesforce_api_describeSObjects(array('Lead', 'Contact', 'Account'));
+  if ($real_fields) {
+    foreach($real_fields as $objtype) {
+      foreach ($objtype->fields AS $key => $field) {
+        if ($field->name && $field->label) {
+          $fields[$field->name] = $field->label;
+        }
+      }
+    } 
+  }
+  return $fields;
+}
+
+function salesforce_api_connect()
+{
+     //Get the path to the Toolkit, set in the options on install.
+  $bpath = (base_path() != "/") ? base_path() : NULL;
+  $toolkit_path = variable_get('salesforcewebform_toolkit_path', $bpath . drupal_get_path('module', 'salesforcewebform') . "/includes"); 
+   	//Ok, now use SOAP to send the information to SalesForce
+	//require_once($toolkit_path .'/soapclient/SforcePartnerClient.php');
+	require_once($toolkit_path .'/soapclient/SforceEnterpriseClient.php');
+	require_once($toolkit_path.'/soapclient/SforceHeaderOptions.php');
+	module_load_include('inc', 'salesforcewebform', '/salesforcewebform_fields');
+	
+	// Salesforce Login information
+	//$wsdl = $toolkit_path . '/soapclient/partner.wsdl.xml';
+	$wsdl = $toolkit_path . '/soapclient/enterprise.wsdl.xml';
+	$userName = variable_get('salesforcewebform_user', NULL);
+	$password = variable_get('salesforcewebform_pw', NULL);
+	
+	// Process of logging on and getting a salesforce.com session
+	//$client = new SforcePartnerClient();
+	$client = new SforceEnterpriseClient();
+	$client->createConnection($wsdl);
+	$loginResult = $client->login($userName, $password);
+
+	return $client;
+}
+
+function salesforce_api_describeSObjects($types) {
+$userName = variable_get('salesforcewebform_user', '');
+$password = variable_get('salesforcewebform_pw', '');
+  static $objects;
+  if (is_string($types)) {
+    $types = array($types);
+  }
+  if (!is_array($types)) {
+    drupal_set_message(t('DescribeSObjects expects an array. ' . gettype($types) . ' received.'), 'error');
+    return false;
+  }
+
+  // There is no reason to describe the same object twice in one HTTP request.
+  // Use a static cache to save API calls and bandwidth.
+  if (!empty($objects)) {
+    $outstanding = array_diff($types, array_keys($objects));
+    if (empty($outstanding)) {
+      $ret = array();
+      foreach ($types as $k) {
+        $ret[$k] = $objects[$k];
+      }
+      return $ret;
+    }
+  }
+
+  if (is_string($types)) {
+    $types = array($types);
+  }
+
+  try {
+    $sf = salesforce_api_connect();
+    //$sf = new SforcePartnerClient();
+	//$sf->createConnection();
+	$loginResult = $sf->login($userName, $password);
+    if ($sf === FALSE) {
+      $link = l('Please verify that you have completed your SalesForce credentials', SALESFORCE_PATH_ADMIN);
+      drupal_set_message(t('Unable to connect to SalesForce. !link', array('!link' => $link)), 'error');
+      return;
+    }
+    $objects = $sf->describeSObjects(array_values($types));
+  } catch (Exception $e) {
+   drupal_set_message("There was an error trying to connect to Salesforce.  Check your login credentials and/or the services this account is able to use (Enterprise, Unlimited, etc). Contact Salesforce to find out why you cannot access this API.");
+   return;
+    //DrupalSalesforce::watchdog(SALESFORCE_LOG_SOME, 'Unable to establish Salesforce connection while issuing describeSObjects API call.', array(), WATCHDOG_ERROR);
+  }
+  if (empty($objects)) {
+    return array();
+  }
+
+  // This is the normalization part: If only one object was described, SalesForce
+  // returned an object instead of an array. ALWAYS return an array of objects.
+  if (is_object($objects)) {
+    $objects = array($objects);
+  }
+
+  // And make it an associative array for good measure.
+  $tmp = array();
+  foreach ($objects as $o) {
+    $tmp[$o->name] = $o;
+  }
+  $objects = $tmp;
+  return $objects;
+}
+
+
+
+function salesforcefields_form_alter(&$form, $form_state, $form_id) 
+{
+   if($form_id == 'search_block_form') 
+   {
+      $form[$form_id] = array(
+         '#title' => t(''),
+         '#type' => 'textfield',
+         '#size' => 15,
+         '#default_value' => '',
+         '#attributes' => array('title' => t('Enter the terms you wish to search for.')),
+      );
+
+      //This replaces default submit with image
+      $form['submit']['#type'] = 'image_button';
+      $form['submit']['#value'] = 'Search';
+      $form['submit']['#src'] = 'sites/all/themes/zen/zen/images/search_button.png'; 
+   } //end if
+}

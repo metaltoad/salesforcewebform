@@ -110,8 +110,8 @@ function salesforcewebform_nodeapi(&$node, $op, $form = NULL, $page = NULL) {
 			case 'update':
 				if ( isset($node->use_salesforce) ) {
 					// store the SalesForce fields
-					$result = db_query("DELETE FROM {salesforcewebform} where `vid` = %d", $node->vid);
-					$result = db_query("INSERT INTO {salesforcewebform} (`vid`, `use`, `object`) " .
+					$result = db_query("DELETE FROM {salesforcewebform} WHERE vid = %d", $node->vid);
+					$result = db_query("INSERT INTO {salesforcewebform} (vid, active, objecttype) " .
     					 							 "VALUES (%d, %d,'%s')", $node->vid, $node->use_salesforce, $node->salesforce_object);
 				}
 				break;
@@ -119,14 +119,14 @@ function salesforcewebform_nodeapi(&$node, $op, $form = NULL, $page = NULL) {
 
 				break;	
 			case 'load':
-				$result = db_query("SELECT `use`, `object` from {salesforcewebform} ".
-			           					 "WHERE `vid` = %d", $node->vid); 
+				$result = db_query("SELECT active, objecttype FROM {salesforcewebform} ".
+			           					 "WHERE vid = %d", $node->vid); 
 				// either $result has 0 or 1 rows, if we have one then add it to the node
 				$row = db_fetch_array($result);
 
-			  if ( $row['use'] == '1' ) {
+			  if ( $row['active'] == '1' ) {
 					$node->use_salesforce = TRUE;
-					$node->salesforce_object = $row['object'];
+					$node->salesforce_object = $row['objecttype'];
 				}
 				else {
 					$node->use_salesforce = FALSE;
