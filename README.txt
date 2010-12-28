@@ -10,7 +10,8 @@ under the 'Toolkit' listing.  Make sure you follow the instructions on the
 project page or the INSTALL.TXT file very closely to make sure the API is 
 installed correctly.
 
-The SalesForce Webform module does require PHP with SOAP enabled.
+The SalesForce Webform module does require PHP with SOAP enabled.  It
+currently only supports the 2.x branch of Webform.
 
 If you are having issues with blank screens or errors on form submissions,
 as a first troubleshooting step, make sure you have entered the correct
