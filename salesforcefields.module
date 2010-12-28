@@ -105,24 +105,3 @@ $password = variable_get('salesforcewebform_pw', '');
   $objects = $tmp;
   return $objects;
 }
-
-
-
-function salesforcefields_form_alter(&$form, $form_state, $form_id) 
-{
-   if($form_id == 'search_block_form') 
-   {
-      $form[$form_id] = array(
-         '#title' => t(''),
-         '#type' => 'textfield',
-         '#size' => 15,
-         '#default_value' => '',
-         '#attributes' => array('title' => t('Enter the terms you wish to search for.')),
-      );
-
-      //This replaces default submit with image
-      $form['submit']['#type'] = 'image_button';
-      $form['submit']['#value'] = 'Search';
-      $form['submit']['#src'] = 'sites/all/themes/zen/zen/images/search_button.png'; 
-   } //end if
-}
