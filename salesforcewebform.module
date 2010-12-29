@@ -95,9 +95,22 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
 		  ); 
 		  $form['advanced']['form_key'] = $new_form_key;
 		  $form['advanced']['#collapsed'] = FALSE;
-		}
-	}
- }
+		  array_unshift($form['#submit'], 'salesforcewebform_form_component_submit');
+	  }
+  }
+}
+
+/**
+ * Intercept webform_component_edit_form and replace the component form_key with the salesforcewebform 
+ * component form_key (if only its not empty) 
+ * @param array $form
+ * @param array $form_state
+ */
+function salesforcewebform_form_component_submit(&$form,&$form_state){
+  if (!empty($form_state['values']['advanced']['form_key'])){
+    $form_state['values']['form_key'] = $form_state['values']['advanced']['form_key'];
+  }
+}
 
 /**
  * Intercept operations on the webform node to assure that the SalesForce fields are tracked.
