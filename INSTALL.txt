@@ -1,4 +1,3 @@
-$Id$
 Requirements
 ------------
 Drupal 5.x, SalesForce.com account, PHP + SOAP enabled

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 // available fields in SalesForce
 $salesforcewebform_available_fields = array(	
