@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function salesforcewebform_load_custom_fields ($loadtype) {
 	$custom_fields = variable_get('salesforcewebform_custom_fields', array());
