@@ -1,6 +1,5 @@
 name = "Salesforce Fields"
 description = "Get Salesforce Fields for the SalesforceWebform module"
 core = 6.x
-dependencies[] = salesforcewebform
-dependencies[] = webform
+
 package = Integration
