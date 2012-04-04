@@ -2,7 +2,7 @@
 
 function salesforcefields_salesforcewebform_fields()
 {
-   $real_fields = salesforce_api_describeSObjects(array('Lead', 'Contact', 'Account'));
+   $real_fields = salesforcefields_salesforce_api_describeSObjects(array('Lead', 'Contact', 'Account'));
   if ($real_fields) {
     foreach($real_fields as $objtype) {
       foreach ($objtype->fields AS $key => $field) {
@@ -15,7 +15,7 @@ function salesforcefields_salesforcewebform_fields()
   return $fields;
 }
 
-function salesforce_api_connect()
+function salesforcefields_salesforce_api_connect()
 {
      //Get the path to the Toolkit, set in the options on install.
   $bpath = (base_path() != "/") ? base_path() : NULL;
@@ -41,7 +41,7 @@ function salesforce_api_connect()
 	return $client;
 }
 
-function salesforce_api_describeSObjects($types) {
+function salesforcefields_salesforce_api_describeSObjects($types) {
 $userName = variable_get('salesforcewebform_user', '');
 $password = variable_get('salesforcewebform_pw', '');
   static $objects;
@@ -71,7 +71,7 @@ $password = variable_get('salesforcewebform_pw', '');
   }
 
   try {
-    $sf = salesforce_api_connect();
+    $sf = salesforcefields_salesforce_api_connect();
     //$sf = new SforcePartnerClient();
 	//$sf->createConnection();
 	$loginResult = $sf->login($userName, $password);
