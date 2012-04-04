@@ -3,5 +3,4 @@ description = "Get Salesforce Fields for the SalesforceWebform module"
 core = 6.x
 dependencies[] = salesforcewebform
 dependencies[] = webform
-dependencies[] = webform_php
 package = Integration

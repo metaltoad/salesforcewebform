@@ -1,6 +1,6 @@
 Requirements
 ------------
-Drupal 6.x, Salesforce.com account, PHP + SOAP enabled, Webform 3.x, Webform PHP
+Drupal 6.x, Salesforce.com account, PHP + SOAP enabled, Webform 3.x
 
 
 Upgrading
@@ -21,20 +21,22 @@ Installation
    writing) from http://wiki.apexdevnet.com/index.php/Web_Services_API#PHP under
    'Toolkits'.
 
-3. Unzip the contents of the toolkit's phptoolkit-20_0 folder into the salesforcewebform/includes directory.
+3. Open the zip file from Salesforce and extract the soapclient folder into the 
+   salesforcewebform/includes directory.  You should now have the following structure
+   under your /modules/ directory: salesforcewebform/includes/soapclient
 
 4. Login as an administrator. Enable the module in the "Administer" -> "Build" -> "Modules"
 
 5. Go to "Administer" -> "site configuration" -> "Salesforce Webform"
   
    In the 'Path to Salesforce PHP Toolkit' textfield,  enter the absolute path to the 
-   phptoolkit folder that you've uploaded.
+   includes folder under salesforcewebform.  (Most users will be able to use the default,
+   but if you experience issues with the toolkit not being found, try entering the absolute
+   path here).
    
-   If you have custom fields defined in your object (Account, Contact, or Lead) form, 
-   enter them into the 'Custom Fields' box.  Enter in the format key|description.  To find
-   the correct key name, in your Salesforce.com page, go to "Setup" -> "App Setup" -> 
-   "Customize" -> "Leads" -> "Fields".  Select the field, and note the "API Field Name".  
-   That is the key you need to list on the Custom Fields page.
+   The Custom Fields textbox remains as legacy code from the 1.x branch.  Custom fields
+   should display directly from Salesforce now.  If not, a field can be added in the format
+   Salesforce API Key|Human Readable Name.
 
    Enter a valid Salesforce username.
 
@@ -58,20 +60,13 @@ Installation
    Make sure that, at a minimum, that your webform contains the minimum required fields from
    the Salesforce Account, Contact, or Lead form.
    
-   Under 'Form Settings' when editing the Webform, add the following code for 'Additional Processing':
-
-	<?php
-	require_once(drupal_get_path('module', 'salesforcewebform') . '/salesforcewebform.module');
-	$form_state = salesforcewebform_process($node, $form, $form_state);
-	?>
-
-   For each component, you must select a Salesforce field to map to.  The default fields
-   are listed for easy mapping.  Custom fields must be entered into the "Administer" ->
-   "Site Configuration" -> "Salesforce Webform" screen.
+   For each component, you must select a Salesforce field to map to.  Fields are grabbed from
+   Salesforce on-the-fly, so all fields should be displayed for you.  If a custom field is 
+   missing, they can be entered into the "Administer" -> "Site Configuration" -> 
+   "Salesforce Webform" screen.
 
    As the last entry in the Webform, add a hidden field 'SID Key'.  Select 'Webform SID Key'
-   as the Salesforce key to map to.  It is very important that the SID Key be the LAST item in
-   the form.
+   as the Salesforce key to map to. 
 
    Save the webform.
 

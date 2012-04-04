@@ -3,6 +3,30 @@
 ini_set("soap.wsdl_cache_enabled", "0");
 
 /**
+ * Implementation of hook_webform_submission_insert
+ * Grab the submission of the webform and process it.
+ */
+function salesforcewebform_webform_submission_presave($node, $submission) {
+  //Only check the webform if the node is set to process into SF
+  if ($node->use_salesforce) {
+    $comps = $node->webform['components'];
+   
+    //Loop through and grab every one that corresponds to a SF field key
+    module_load_include('inc', 'salesforcewebform', 'salesforcewebform_fields');
+		$sffields = array_keys(array_change_key_case(salesforcewebform_available_fields()));
+		$compmap = array();
+		foreach ($submission->data as $subkey=>$subinfo) {
+      if (in_array($comps[$subkey]['form_key'], $sffields, TRUE)) {
+        //This is a SF-related field.  Mark it for display.
+        $compmap[$subkey] = $comps[$subkey]['form_key'];
+      }
+    }
+    //Send the node, webform submission, and components to the processing function.
+    $output = salesforcewebform_process($node, $submission, $compmap);
+  }
+}
+
+/**
  * Allow for editing webforms with SalesForce connection information and modifying the
  * each webform to post to SalesForce.
  */
@@ -241,7 +265,7 @@ function create_custom_field_spec ($custom_fields) {
 	return $spec;
 }
 
-function salesforcewebform_process($node, $form, $form_state) {
+function salesforcewebform_process($node, $submission, $compmap) {
   $object_typecode = ($node->salesforce_object) ? $node->salesforce_object : "l";
   $multiple_objects = FALSE;
   switch($object_typecode) {
@@ -262,7 +286,7 @@ function salesforcewebform_process($node, $form, $form_state) {
       $multiple_objects = TRUE;
     break;
   }
-  $form_values = $form_state['values'];
+
   
   //Get the path to the Toolkit, set in the options on install.
   $bpath = (base_path() != "/") ? base_path() : NULL;
@@ -275,104 +299,41 @@ function salesforcewebform_process($node, $form, $form_state) {
 	
 	$all_fields = array();
 	$master_fields = array_merge(salesforcewebform_available_fields(), salesforcewebform_load_custom_fields(NULL));
-	$submission = array();
-	foreach($master_fields as $mkey => $mvalue) {
-    if (!is_array($mvalue)) {
-      if (array_key_exists(strtolower($mkey), $form_values['submitted_tree'])) {
-        $submission[$mkey] = $form_values['submitted_tree'][strtolower($mkey)];
-      }
-      else {
-        foreach ($form_values['submitted_tree'] as $fkey => $fvalue) {
-          if (is_array($fvalue)) {
-            if (array_key_exists(strtolower($mkey), $fvalue)) {
-              $submission[$mkey] = $form_values['submitted_tree'][$fkey][strtolower($mkey)];
-            }
-            else {
-              foreach ($fvalue as $gkey => $gvalue) {
-                if (is_array($gvalue)) {
-                  if (array_key_exists(strtolower($mkey), $gvalue)) {
-                    $submission[$mkey] = $form_values['submitted_tree'][$fkey][$gkey][strtolower($mkey)];
-                  }
-                  else {
-                   foreach ($gvalue as $hkey => $hvalue) {
-                     if (is_array($hvalue)) {
-                       if (array_key_exists(strtolower($mkey), $hvalue)) {
-                         $submission[$mkey] = $form_values['submitted_tree'][$fkey][$gkey][$hkey][strtolower($mkey)];
-                       }
-                     }
-                   }
-                 }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    else {
-      foreach ($mvalue as $skey => $svalue) {
-        if (array_key_exists(strtolower($skey), $form_values['submitted_tree'])) {
-          $submission[$skey] = $form_values['submitted_tree'][strtolower($skey)];
-        }
-        else {
-          foreach ($form_values['submitted_tree'] as $fkey => $fvalue) {
-            if (is_array($fvalue)) {
-              if (array_key_exists(strtolower($skey), $fvalue)) {
-                $submission[$skey] = $form_values['submitted_tree'][$fkey][strtolower($skey)];
-              }
-              else {
-                foreach ($fvalue as $gkey => $gvalue) {
-                  if (is_array($gvalue)) {
-                    if (array_key_exists(strtolower($skey), $gvalue)) {
-                      $submission[$skey] = $form_values['submitted_tree'][$fkey][$gkey][strtolower($skey)];
-                    }
-                    else {
-                     foreach ($gvalue as $hkey => $hvalue) {
-                       if (is_array($hvalue)) {
-                         if (array_key_exists(strtolower($skey), $hvalue)) {
-                           $submission[$skey] = $form_values['submitted_tree'][$fkey][$gkey][$hkey][strtolower($skey)];
-                         }
-                       }
-                     }
-                   }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  $sid = empty($form_values['submitted_tree']['webformsid__c']) ? _salesforcewebform_generate_sid() : $form_values['submitted_tree']['webformsid__c'];
-  $all_fields['OWNERID'] = $client->userId;
-  $submitted = $form_values['submitted'];
-  
-  foreach($submission as $keyid=>$keyval) {
-    foreach($submitted as $skeyid=>$skeyval) {
-    	if($keyval == $skeyval && $keyid == "WebformSID__c") {
-      $websidkey = $skeyid;
-    	}
-    }
+	
+	//Determine which field has the WebformSID key
+	$sidkey = FALSE;
+	$sidkey = array_search("webformsid__c", $compmap);
+	if ($sidkey === FALSE) {
+    //Something is wrong, because there's no SID field
   }
 
-  $all_fields['WebformSID__c'] = empty($submission['WebformSID__c']) ? $form_values['details']['nid']."-".$sid : $submission['WebformSID__c'];
-  $form_values['submitted_tree']['WebformSID__c'] = $all_fields['WebformSID__c'];
-  $form_values['submitted'][$websidkey] = $all_fields['WebformSID__c'];
-  if(isset($form_values['submission'])) {
-    $form_values['submission']->data[$websidkey]['value'][0] = $all_fields['WebformSID__c']; 
+  //Assign an SID if one is not already set.
+  $sid = empty($submission->data[$sidkey]['value'][0]) ? _salesforcewebform_generate_sid() : $submission->data[$sidkey]['value'][0];
+  $all_fields['WebformSID__c'] = empty($submission->data[$sidkey]['value'][0]) ? $node->nid ."-". $sid : $submission->data[$sidkey]['value'][0];
+  if (empty($submission->data[$sidkey]['value'][0])) {
+    $submission->data[$sidkey]['value'][0] = $all_fields['WebformSID__c'];
   }
-  foreach($submission as $fkey=>$fvalue) {
-    if((!in_array($fkey, array('DoNotCall', 'HasOptedOutOfEmail', 'HasOptedOutOfFax', 'submitted', 'submission', 'details', 'op', 'submit', 'form_id', 'form_token', 'submitted_tree', 'WebformSID__c'))  && !is_numeric($fkey)) && $fvalue) {
-      if(!is_array($fvalue)) {
-        $all_fields[$fkey] = htmlspecialchars(stripslashes(strip_tags($fvalue)));
+
+  //Convert the component map to SF uppercase
+  foreach ($compmap as $compkey=>&$compfield) {
+    foreach ($master_fields as $mkey=>$mvalue) {
+      if (strtolower($mvalue) == $compfield) {
+        $compfield = $mvalue;
+      }
+    }
+  }
+  //Take the submission data and put it into the format of SFFieldName=>Value; if multiple values are set, string them together.
+  foreach ($submission->data as $fkey=>$fvalue) {
+    if((!in_array($compmap[$fkey], array('donotcall', 'hasoptedoutofemail', 'hasoptedoutoffax', 'submitted', 'submission', 'details', 'op', 'submit', 'form_id', 'form_token', 'submitted_tree', 'webformsid__c'))  && !is_numeric($compmap[$fkey])) && $fvalue['value'][0]) {
+      if(count($fvalue['value']) == 1) {
+        $all_fields[$compmap[$fkey]] = htmlspecialchars(stripslashes(strip_tags($fvalue['value'][0])));
       }
       else {
         $fsubs = "";
-        foreach($fvalue as $subkey=>$subvalue) {
+        foreach($fvalue['value'] as $subkey=>$subvalue) {
           $fsubs .= $subvalue.";";
         }
-        $all_fields[$fkey] = $fsubs;
+        $all_fields[$compmap[$fkey]] = $fsubs;
       }
     }
 	}
@@ -387,6 +348,8 @@ function salesforcewebform_process($node, $form, $form_state) {
 	$client->createConnection($wsdl);
 	$loginResult = $client->login($userName, $password);
 	
+  $all_fields['OWNERID'] = $client->userId;
+
   $sObjects = array();
 
   $sObject = new sObject();
@@ -438,11 +401,6 @@ function salesforcewebform_process($node, $form, $form_state) {
   }
   $total_record_count = $total_record_count + $record_count;
 
-  $form_values['submitted_tree']['webformsid__c'] = $form_values['submitted_tree']['WebformSID__c'];
-  unset($form_values['submitted_tree']['WebformSID__c']);
-  $form_state['values'] = $form_values;
-
-  return $form_state;
 }
 
 function _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $file_created, $file_failed)

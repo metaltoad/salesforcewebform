@@ -2,5 +2,6 @@ name = SalesForce Webform
 description = Extends the Webform module to submit to SalesForce
 package = Integration
 dependencies[] = webform
+dependencies[] = salesforcefields
 core = 6.x
 
