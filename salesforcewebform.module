@@ -34,7 +34,7 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
 	// handle webform client forms (instances of webforms that are submitted)	
 	// webform names client forms with the pattern web_form_client_form_$nid, use this knowledge to
 	// manipulate the forms that webform displays
-	if ( ereg('^webform_client_form_', $form_id) ) {
+	if ( !empty($form['#node']->webform) ) {
 		
 		global $base_url;
 		$node = $form['#parameters'][2];
@@ -43,48 +43,47 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
 		if ( empty($node->use_salesforce) ) {
 			return ;
 		}
-	}
-	
-	// handle editing of webform nodes
-  elseif ( $form_id == 'webform_node_form' ) {		
-	
-		  /* Collapse the email info on the page assuming that it is going to be a SalesForce form */
-		  $form['mailsettings']['#collapsed'] = TRUE;
-
-		  /* Start SalesForce Settings Form */
-		  $salesforce_form['salesforcesettings'] = array(
-		    '#type' => 'fieldset',
-		    '#title' => t('SalesForce Settings'),
-		    '#collapsible' => TRUE,
-		    '#collapsed' => FALSE,
-		    '#weight' => -2,
-		  );
 		
-		  $salesforce_form['salesforcesettings']['use_salesforce'] = array (
-        '#type' => 'radios',
-        '#title' => t('Submit to SalesForce'),
-        '#options' => array(
-          1=>t('Yes'), 0=>t('No')
-        ),
-        '#description' => t('If yes, the form will be sent via SOAP to SalesForce.  Make sure you have specified the username & password in Administer->Site Configuration->SalesForce Webform first.'),
-        '#default_value' => ($form['#node']->use_salesforce) ? $form['#node']->use_salesforce : 0,
-		  );
-		  
-		  $salesforce_form['salesforcesettings']['salesforce_object'] = array(
-        '#type' => 'select',
-        '#title' => t('Object Type'),
-        '#options' => array(
-          'l' => t('Lead'), 'c' => t('Contact'), 'a' => t('Account'), 'p' => t('Person Account'), 'm' => t('Account + Contact'),
-        ),
-        '#description' => t('Select which object type to submit to.'),
-        '#default_value' => ($form['#node']->salesforce_object) ? $form['#node']->salesforce_object : 'l',
-      );
-		  /* End SalesForce settings form */
+	// handle editing of webform nodes
 
-		  // integrate the SalesForce form into the form
-		  $pos = array_search('mailsettings', array_keys($form)) + 1;
-		  $form = array_merge(array_slice($form, 0, $pos), $salesforce_form, array_slice($form, $pos));
-	
+
+    /* Collapse the email info on the page assuming that it is going to be a SalesForce form */
+    $form['mailsettings']['#collapsed'] = TRUE;
+
+    /* Start SalesForce Settings Form */
+    $salesforce_form['salesforcesettings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('SalesForce Settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#weight' => -2,
+    );
+  
+    $salesforce_form['salesforcesettings']['use_salesforce'] = array (
+      '#type' => 'radios',
+      '#title' => t('Submit to SalesForce'),
+      '#options' => array(
+        1=>t('Yes'), 0=>t('No')
+      ),
+      '#description' => t('If yes, the form will be sent via SOAP to SalesForce.  Make sure you have specified the username & password in Administer->Site Configuration->SalesForce Webform first.'),
+      '#default_value' => ($form['#node']->use_salesforce) ? $form['#node']->use_salesforce : 0,
+    );
+    
+    $salesforce_form['salesforcesettings']['salesforce_object'] = array(
+      '#type' => 'select',
+      '#title' => t('Object Type'),
+      '#options' => array(
+        'l' => t('Lead'), 'c' => t('Contact'), 'a' => t('Account'), 'p' => t('Person Account'), 'm' => t('Account + Contact'),
+      ),
+      '#description' => t('Select which object type to submit to.'),
+      '#default_value' => ($form['#node']->salesforce_object) ? $form['#node']->salesforce_object : 'l',
+    );
+    /* End SalesForce settings form */
+
+    // integrate the SalesForce form into the form
+    $pos = array_search('mailsettings', array_keys($form)) + 1;
+    $form = array_merge(array_slice($form, 0, $pos), $salesforce_form, array_slice($form, $pos));
+
 	}
 		
 	// handle editing fields on the webform
@@ -143,7 +142,8 @@ function salesforcewebform_form_component_submit(&$form,&$form_state){
  * Intercept operations on the webform node to assure that the SalesForce fields are tracked.
  */
 function salesforcewebform_nodeapi(&$node, $op, $form = NULL, $page = NULL) {	
-	if ( $node->type == 'webform') {
+	$webform_node_types = webform_variable_get('webform_node_types');
+  if (in_array($node->type, $webform_node_types)) {
 
 		switch ($op) {
 			case 'insert':
