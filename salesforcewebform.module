@@ -350,8 +350,6 @@ function salesforcewebform_process($node, $submission, $compmap) {
 	$client->createConnection($wsdl);
 	$loginResult = $client->login($userName, $password);
 	
-  $all_fields['OWNERID'] = $client->userId;
-
   $sObjects = array();
 
   $sObject = new sObject();
