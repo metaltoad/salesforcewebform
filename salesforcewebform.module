@@ -156,6 +156,9 @@ function salesforcewebform_nodeapi(&$node, $op, $form = NULL, $page = NULL) {
     					 							 "VALUES (%d, %d,'%s')", $node->vid, $node->use_salesforce, $node->salesforce_object);
 				}
 				break;
+      case 'delete':
+        $result = db_query("DELETE FROM {salesforcewebform} WHERE vid = %d", $node->vid);
+        break;
 			case 'validate':
 
 				break;	
