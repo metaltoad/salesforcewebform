@@ -106,7 +106,11 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
           $sfwaf_array[$sfwafkey] = $subarray;
         }
 		  }
+		  
+		  //Obtain the list of all possible fields from the API; then sort them alphabetically.
 		  $valid_fields = array_merge($sfwaf_array, salesforcewebform_load_custom_fields('webform'));
+      asort($valid_fields);
+		  
 		  $new_form_key = array(
 				'#type' => 'select',
 				'#title' => t('SalesForce Field Key'),
