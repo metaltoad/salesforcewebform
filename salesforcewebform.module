@@ -331,7 +331,9 @@ function salesforcewebform_process($node, $submission, $compmap) {
       else {
         $fsubs = "";
         foreach($fvalue['value'] as $subkey=>$subvalue) {
-          $fsubs .= $subvalue.";";
+          if ($subvalue) {
+            $fsubs .= $subvalue.";";
+          }
         }
         $all_fields[$compmap[$fkey]] = $fsubs;
       }
