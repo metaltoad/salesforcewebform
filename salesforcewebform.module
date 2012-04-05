@@ -32,8 +32,6 @@ function salesforcewebform_webform_submission_presave($node, $submission) {
  */
 function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
 	// handle webform client forms (instances of webforms that are submitted)	
-	// webform names client forms with the pattern web_form_client_form_$nid, use this knowledge to
-	// manipulate the forms that webform displays
 	if ( !empty($form['#node']->webform) ) {
 		
 		global $base_url;
@@ -44,8 +42,7 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
 			return ;
 		}
 		
-	// handle editing of webform nodes
-
+    // handle editing of webform nodes
 
     /* Collapse the email info on the page assuming that it is going to be a SalesForce form */
     $form['mailsettings']['#collapsed'] = TRUE;
@@ -91,7 +88,11 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
  		// if the user has specified the SalesForce action, then we will be posting the form to SalesForce
 		if ( $form['#parameters'][2]->use_salesforce == 1 ) {
 	    module_load_include('inc', 'salesforcewebform', 'salesforcewebform_fields');
-		  foreach(salesforcewebform_available_fields() as $sfwafkey=>$sfwafvalue) {
+	    //Get the object type code; default to lead if not set.
+	    
+	    $object_typecode = ($form['#parameters'][2]->salesforce_object) ? $form['#parameters'][2]->salesforce_object : "l";
+	    
+		  foreach(salesforcewebform_available_fields($object_typecode) as $sfwafkey=>$sfwafvalue) {
         if (!is_array($sfwafvalue)) {
           $sfwafkey = strtolower($sfwafkey);
           $sfwaf_array[$sfwafkey] = $sfwafvalue;
@@ -302,7 +303,7 @@ function salesforcewebform_process($node, $submission, $compmap) {
 	module_load_include('inc', 'salesforcewebform', '/salesforcewebform_fields');
 	
 	$all_fields = array();
-	$master_fields = array_merge(salesforcewebform_available_fields(), salesforcewebform_load_custom_fields(NULL));
+	$master_fields = array_merge(salesforcewebform_available_fields($object_typecode), salesforcewebform_load_custom_fields(NULL));
 	
 	//Determine which field has the WebformSID key
 	$sidkey = FALSE;

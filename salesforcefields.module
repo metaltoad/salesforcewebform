@@ -1,13 +1,45 @@
 <?php
-
-function salesforcefields_salesforcewebform_fields()
-{
-   $real_fields = salesforcefields_salesforce_api_describeSObjects(array('Lead', 'Contact', 'Account'));
+/* Create a list of all salesforce fields for a specified object type
+ * @param $form_sfobject_typecode Code for the SF object type
+ * @return $fields A list of fields for the object type
+ */
+function salesforcefields_salesforcewebform_fields($form_sfobject_typecode) {
+  //Translate SF object type code to SF object names
+  switch ($form_sfobject_typecode) {
+    case "l":
+      $types = array('Lead');
+    break;
+    case "c":
+      $types = array('Contact');
+    break;
+    case "p":
+      $types = array('Account');
+    break;
+    case "a":
+      $types = array('Account');
+    break;
+    case "m":
+      $types = array('Contact','Account');
+    break;
+  }
+  
+  $real_fields = salesforcefields_salesforce_api_describeSObjects(array('Lead', 'Contact', 'Account'));
   if ($real_fields) {
     foreach($real_fields as $objtype) {
-      foreach ($objtype->fields AS $key => $field) {
-        if ($field->name && $field->label) {
-          $fields[$field->name] = $field->label;
+      //Check to see if the current SF object is one of the ones this form uses.  If it is, add the fields to the list.
+      if (in_array($objtype->name, $types)) {
+        foreach ($objtype->fields AS $key => $field) {
+          if ($field->name && $field->label && ($field->createable || $field->updateable)) {
+            if ($objtype->name == 'Lead' && $field->name == 'Company') {
+              $fields[$field->name] = $objtype->name .':'. $field->label .' (required special)';
+            }
+            elseif (!$field->nillable && $field->createable && !$field->defaultedOnCreate) {
+              $fields[$field->name] = $objtype->name .':'. $field->label .' (required)';
+            }
+            else {
+              $fields[$field->name] = $objtype->name .':'. $field->label;
+            }
+          }
         }
       }
     } 

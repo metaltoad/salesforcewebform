@@ -19,15 +19,19 @@ function salesforcewebform_load_custom_fields ($loadtype) {
 }
 
 
-// available fields in SalesForce
-function salesforcewebform_available_fields() {
+/*
+ * Obtain the available fields in SalesForce
+ * @param string $form_sfobject_typecode Salesforce Object Type
+ * @return $fields Array of fields available
+ */
+function salesforcewebform_available_fields($form_sfobject_typecode) {
    $fields = array(    
     //Special Field to block Processing
     0 => '--Do Not Map to SalesForce--',
     );
 
   //Define Implementation for hook_salesforcewebform_fields
-  $fields = array_merge($fields, module_invoke_all('salesforcewebform_fields'));
+  $fields = array_merge($fields, module_invoke_all('salesforcewebform_fields', $form_sfobject_typecode));
 
   return $fields;
 }
