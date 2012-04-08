@@ -13,10 +13,8 @@ under the 'Toolkit' listing.  Make sure you follow the instructions on the
 project page or the INSTALL.TXT file very closely to make sure the API is 
 installed correctly.
 
-The Salesforce Webform module does require PHP with SOAP enabled.  The 2.x
-branch of the Salesforce Webform module only supports Webform's 3.x branch.
-If you are looking to use Salesforce Webform with the Webform's 2.x branch,
-please download and install Salesforce Webform's 1.x version.
+The Salesforce Webform module does require PHP with SOAP enabled.  The Drupal
+7 version of Salesforce Webform utilizes Webform 3.x.
 
 If you are having issues with blank screens or errors on form submissions,
 as a first troubleshooting step, make sure you have entered the correct

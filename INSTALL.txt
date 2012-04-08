@@ -1,16 +1,11 @@
 Requirements
 ------------
-Drupal 6.x, Salesforce.com account, PHP + SOAP enabled, Webform 3.x
+Drupal 7.x, Salesforce.com account, PHP + SOAP enabled, Webform 3.x
 
 
 Upgrading
 ------------
 Always make sure to run update.php when upgrading the module to a new version
-
-If you are upgrading from the 1.x to the 2.x branch, check to make sure that
-the field mappings are maintained.  Users moving from the 1.2->2.0 editions
-may have fields that do not remained mapped due to a change in the way
-Salesforce Webform handles the mappings.
 
 
 Installation
@@ -33,10 +28,6 @@ Installation
    includes folder under salesforcewebform.  (Most users will be able to use the default,
    but if you experience issues with the toolkit not being found, try entering the absolute
    path here).
-   
-   The Custom Fields textbox remains as legacy code from the 1.x branch.  Custom fields
-   should display directly from Salesforce now.  If not, a field can be added in the format
-   Salesforce API Key|Human Readable Name.
 
    Enter a valid Salesforce username.
 
@@ -58,12 +49,11 @@ Installation
    the 'Yes' option to post the form to Salesforce.
 
    Make sure that, at a minimum, that your webform contains the minimum required fields from
-   the Salesforce Account, Contact, or Lead form.
+   the Salesforce Account, Contact, or Lead form.  An alert will appear at the top of the 
+   Webform configuration pages if you are missing a required field.
    
    For each component, you must select a Salesforce field to map to.  Fields are grabbed from
-   Salesforce on-the-fly, so all fields should be displayed for you.  If a custom field is 
-   missing, they can be entered into the "Administer" -> "Site Configuration" -> 
-   "Salesforce Webform" screen.
+   Salesforce on-the-fly, so all fields should be displayed for you.
 
    As the last entry in the Webform, add a hidden field 'SID Key'.  Select 'Webform SID Key'
    as the Salesforce key to map to. 
