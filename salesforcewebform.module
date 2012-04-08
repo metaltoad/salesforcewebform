@@ -263,13 +263,14 @@ function _salesforcewebform_node_uses_salesforce($node) {
  * @return array
  */
 function salesforcewebform_menu() {
-  $items['admin/config/salesforcewebform'] = array(
+  $items['admin/config/development/salesforcewebform'] = array(
     'title' => 'SalesForce Webform',
+    'position' => 'left',
+    'weight' => -100,
     'description' => 'Configure SalesForce webform integration',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('salesforcewebform_admin_settings'),
-    'access arguments' => array('access administration pages'),
-    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('administer site configuration'),
   );
   return $items;
 }
