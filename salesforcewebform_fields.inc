@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function salesforcewebform_load_custom_fields($loadtype) {
   $custom_fields = variable_get('salesforcewebform_custom_fields', array());
   $return_fields = array();
@@ -13,9 +17,11 @@ function salesforcewebform_load_custom_fields($loadtype) {
     else {
       $return_fields = $custom_fields;
     }
-    return $return_fields ;
+    return $return_fields;
   }
-  else return array();
+  else {
+    return array();
+  }
 }
 
 
@@ -24,11 +30,15 @@ function salesforcewebform_load_custom_fields($loadtype) {
  * @param string $form_sfobject_typecode Salesforce Object Type
  * @return $fields Array of fields available
  */
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function salesforcewebform_available_fields($form_sfobject_typecode) {
-   $fields = array(    
+  $fields = array(
     //Special Field to block Processing
     0 => '--Do Not Map to SalesForce--',
-    );
+  );
 
   //Define Implementation for hook_salesforcewebform_fields
   $fields = array_merge($fields, module_invoke_all('salesforcewebform_fields', $form_sfobject_typecode));
@@ -37,6 +47,10 @@ function salesforcewebform_available_fields($form_sfobject_typecode) {
 }
 
 // required fields in SalesForce
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function salesforcewebform_required_fields($form_sfobject_typecode) {
 
   //Define Implementation for hook_salesforcewebform_fields

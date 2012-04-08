@@ -1,27 +1,33 @@
 <?php
+/**
+ * @file
+ * Install, update and uninstall functions for the salesforcewebform module.
+ *
+ */
+
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function salesforcewebform_schema() {
   $schema['salesforcewebform'] = array(
-    'description' => t('TODO'),
+    'description' => 'TODO',
     'fields' => array(
       'vid' => array(
-        'description' => t('TODO'),
+        'description' => 'TODO',
         'type' => 'int',
         'unsigned' => 1,
         'not null' => TRUE,
       ),
       'active' => array(
-        'description' => t('TODO'),
+        'description' => 'TODO',
         'type' => 'int',
         'size' => 'tiny',
         'not null' => TRUE,
         'default' => 0,
       ),
       'objecttype' => array(
-        'description' => t('TODO'),
+        'description' => 'TODO',
         'type' => 'char',
         'length' => '1',
         'not null' => TRUE,
@@ -34,13 +40,18 @@ function salesforcewebform_schema() {
   return $schema;
 }
 
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function salesforcewebform_install() {
   $success = FALSE;
 
   switch ($GLOBALS['db_type']) {
     case 'mysqli':
     case 'mysql':
-      $success = drupal_install_schema('salesforcewebform');
+      // TODO The drupal_(un)install_schema functions are called automatically in D7.
+      $success = array()/*drupal_install_schema('salesforcewebform')*/;
       break;
 
     case 'pgsql':
@@ -61,7 +72,8 @@ function salesforcewebform_install() {
  */
 function salesforcewebform_uninstall() {
   // Remove tables.
-  drupal_uninstall_schema('salesforcewebform');
+  // TODO The drupal_(un)install_schema functions are called automatically in D7.
+  // drupal_uninstall_schema('salesforcewebform')
 
   variable_del("salesforcewebform_user");
   variable_del("salesforcewebform_pw");
@@ -78,15 +90,19 @@ function salesforcewebform_update_6001() {
   switch ($GLOBALS['db_type']) {
     case 'mysqli':
     case 'mysql':
-      $ret[] = update_sql("ALTER TABLE {salesforcewebform} ADD COLUMN
-object char(1) NOT NULL default 'l'");
+      // TODO update_sql has been removed. Use the database API for any schema or data changes.
+      $ret[] = array() /* update_sql("ALTER TABLE {salesforcewebform} ADD COLUMN
+object char(1) NOT NULL default 'l'") */;
       break;
     case 'pgsql':
       db_add_column($ret, 'salesforce', 'description',
 'char(1)', array('default' => 'l', 'not null' => TRUE));
       break;
   }
-  return $ret;
+  // hook_update_N() no longer returns a $ret array. Instead, return
+  // nothing or a translated string indicating the update ran successfully.
+  // See http://drupal.org/node/224333#update_sql.
+  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
 }
 
 /**
@@ -94,7 +110,10 @@ object char(1) NOT NULL default 'l'");
  */
 function salesforcewebform_update_6002() {
   $ret = array();
-  db_change_field($ret, 'salesforcewebform', 'use', 'active', array('description' => t('TODO'), 'type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
-  db_change_field($ret, 'salesforcewebform', 'object', 'objecttype', array('description' => t('TODO'), 'type' => 'char', 'length' => '1', 'not null' => TRUE, 'default' => 'l'));
-  return $ret;
+  db_change_field('salesforcewebform', 'use', 'active', array('description' => t('TODO'), 'type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
+  db_change_field('salesforcewebform', 'object', 'objecttype', array('description' => t('TODO'), 'type' => 'char', 'length' => '1', 'not null' => TRUE, 'default' => 'l'));
+  // hook_update_N() no longer returns a $ret array. Instead, return
+  // nothing or a translated string indicating the update ran successfully.
+  // See http://drupal.org/node/224333#update_sql.
+  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
 }
