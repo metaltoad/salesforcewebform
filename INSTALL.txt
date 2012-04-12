@@ -19,10 +19,14 @@ Installation
 3. Open the zip file from Salesforce and extract the soapclient folder into the 
    salesforcewebform/includes directory.  You should now have the following structure
    under your /modules/ directory: salesforcewebform/includes/soapclient
+   
+   ***Depending upon your server configuration, you may need to change the file permissions
+   on the soapclient directory.***
 
 4. Login as an administrator. Enable the module in the "Administer" -> "Build" -> "Modules"
 
-5. Go to "Administer" -> "site configuration" -> "Salesforce Webform"
+5. Go to "Administer" -> "Configuration" -> "Salesforce Webform" (under the "Development"
+   category).
   
    In the 'Path to Salesforce PHP Toolkit' textfield,  enter the absolute path to the 
    includes folder under salesforcewebform.  (Most users will be able to use the default,

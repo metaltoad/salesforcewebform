@@ -108,7 +108,7 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
             }
           }
           if ($missing === TRUE) {
-            drupal_set_message(t('Missing required field: ' . $field->label), 'error');
+            drupal_set_message(t('Missing required field: @field', array('@field' => check_plain($field->label))), 'error');
           }
         }
       }
@@ -119,7 +119,7 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
   elseif ($form_id == 'webform_component_edit_form') {
     //The node is contained in $form['#parameters'][2]
     // if the user has specified the SalesForce action, then we will be posting the form to SalesForce
-    if ( $node->use_salesforce == 1 ) {
+    if ( isset($node->use_salesforce) && $node->use_salesforce == 1 ) {
       //Get the object type code; default to lead if not set.
       $object_typecode = ($node->salesforce_object) ? $node->salesforce_object : "l";
       $sfwaf_array = array();
@@ -409,13 +409,13 @@ function salesforcewebform_process_data($node, $submission, $compmap) {
     $sf->createConnection($wsdl);
     $loginResult = $sf->login($userName, $password);
     if ($sf === FALSE) {
-      $link = l('Please verify that you have completed your SalesForce credentials', SALESFORCE_PATH_ADMIN);
-      drupal_set_message(t('Unable to connect to SalesForce. !link', array('!link' => $link)), 'error');
+      $link = l('Please verify that you have completed your SalesForce credentials', "admin/config/development/salesforcewebform");
+      drupal_set_message(t('Unable to connect to SalesForce. !link', array('!link' => check_url($link))), 'error');
       return;
     }
   }
   catch (Exception $e) {
-    drupal_set_message("There was an error trying to connect to Salesforce.  Check your login credentials and/or the services this account is able to use (Enterprise, Unlimited, etc). Contact Salesforce to find out why you cannot access this API.");
+    drupal_set_message(t("There was an error trying to connect to Salesforce.  Check your login credentials and/or the services this account is able to use (Enterprise, Unlimited, etc). Contact Salesforce to find out why you cannot access this API."));
     return;
     //DrupalSalesforce::watchdog(SALESFORCE_LOG_SOME, 'Unable to establish Salesforce connection while issuing describeSObjects API call.', array(), WATCHDOG_ERROR);
   }
@@ -526,7 +526,7 @@ function _salesforcewebform_upsert_accounts($client, $sObjects, $file_updated, $
     $success = array();
     array_push($success, $accounts_created, $accounts_updated, $accounts_failed);
     if ($errMessage) {
-      drupal_set_message($errMessage);
+      drupal_set_message(t('@msg', array('@msg' => check_plain($errMessage))));
     }
     return $success;
   }

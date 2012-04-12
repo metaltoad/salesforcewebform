@@ -11,70 +11,40 @@
  */
 function salesforcewebform_schema() {
   $schema['salesforcewebform'] = array(
-    'description' => 'TODO',
+    'description' => 'Salesforce Webform Module Table',
     'fields' => array(
-      'vid' => array(
-        'description' => 'TODO',
+      'nid' => array(
+        'description' => 'Node ID',
         'type' => 'int',
         'unsigned' => 1,
         'not null' => TRUE,
       ),
       'active' => array(
-        'description' => 'TODO',
+        'description' => 'Salesforce Webform enabled',
         'type' => 'int',
         'size' => 'tiny',
         'not null' => TRUE,
         'default' => 0,
       ),
       'objecttype' => array(
-        'description' => 'TODO',
+        'description' => 'Salesforce object type',
         'type' => 'char',
         'length' => '1',
         'not null' => TRUE,
         'default' => 'l',
       ),
     ),
-    'primary key' => array('vid'),
+    'primary key' => array('nid'),
   );
 
   return $schema;
 }
 
 /**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
- */
-function salesforcewebform_install() {
-  $success = FALSE;
-
-  switch ($GLOBALS['db_type']) {
-    case 'mysqli':
-    case 'mysql':
-      // TODO The drupal_(un)install_schema functions are called automatically in D7.
-      $success = array()/*drupal_install_schema('salesforcewebform')*/;
-      break;
-
-    case 'pgsql':
-      $success = drupal_install_schema('salesforcewebform');
-      break;
-  }
-
-  if ($success[0]['success']) {
-    drupal_set_message(t('SalesForce Webform module installed module tables successfully.'));
-  }
-  else {
-    drupal_set_message(t('The installation of SalesForce webform module was unsuccessful.'), 'error');
-  }
-}
-
-/**
- * Remove tables on uninstall.
+ * Remove variables on uninstall.
  */
 function salesforcewebform_uninstall() {
-  // Remove tables.
-  // TODO The drupal_(un)install_schema functions are called automatically in D7.
-  // drupal_uninstall_schema('salesforcewebform')
-
+  // Remove variables.
   variable_del("salesforcewebform_user");
   variable_del("salesforcewebform_pw");
   variable_del("salesforcewebform_custom_fields");
@@ -83,37 +53,10 @@ function salesforcewebform_uninstall() {
 }
 
 /**
- * Update databse to allow object type selection
+ * Update vid to nid in the database when going to D7
  */
-function salesforcewebform_update_6001() {
+function salesforcewebform_update_7001() {
   $ret = array();
-  switch ($GLOBALS['db_type']) {
-    case 'mysqli':
-    case 'mysql':
-      // TODO update_sql has been removed. Use the database API for any schema or data changes.
-      $ret[] = array() /* update_sql("ALTER TABLE {salesforcewebform} ADD COLUMN
-object char(1) NOT NULL default 'l'") */;
-      break;
-    case 'pgsql':
-      db_add_column($ret, 'salesforce', 'description',
-'char(1)', array('default' => 'l', 'not null' => TRUE));
-      break;
-  }
-  // hook_update_N() no longer returns a $ret array. Instead, return
-  // nothing or a translated string indicating the update ran successfully.
-  // See http://drupal.org/node/224333#update_sql.
-  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
-}
-
-/**
- * Update database to remove SQL reserved words from column names
- */
-function salesforcewebform_update_6002() {
-  $ret = array();
-  db_change_field('salesforcewebform', 'use', 'active', array('description' => t('TODO'), 'type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0));
-  db_change_field('salesforcewebform', 'object', 'objecttype', array('description' => t('TODO'), 'type' => 'char', 'length' => '1', 'not null' => TRUE, 'default' => 'l'));
-  // hook_update_N() no longer returns a $ret array. Instead, return
-  // nothing or a translated string indicating the update ran successfully.
-  // See http://drupal.org/node/224333#update_sql.
-  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
+  $ret[] = db_drop_primary_key('salesforcewebform');
+  $ret[] = db_change_field('salesforcewebform', 'vid', 'nid', array('type' => 'int', 'unsigned' => 1, 'not null' => TRUE, 'description' => 'Node ID'), array('primary key' => array('nid')));
 }

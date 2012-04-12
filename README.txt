@@ -21,8 +21,13 @@ as a first troubleshooting step, make sure you have entered the correct
 username and password + Security Token combination on the administration
 page.
 
-This module was sponsored by by Davis Applied Technology College, 
-http://www.datc.edu.  The module was programmed by Obsidian Design LLP,
+This module was originally sponsored by by Davis Applied Technology College, 
+http://www.datc.edu.  
+
+The port of this module to Drupal 7 and compatibility with Webform 3.x (both 
+D6 and D7) was sponsored by Aktana, http://www.aktana.com
+.
+The module was programmed by Obsidian Design LLP, 
 http://www.obsidiandesign.com.
 
 The module is based, in part, on the sugarwebform module.

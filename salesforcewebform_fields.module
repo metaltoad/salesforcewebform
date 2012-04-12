@@ -79,7 +79,7 @@ function salesforcewebform_fields_salesforce_api_connect() {
     return $client;
   }
   else {
-    drupal_set_message("There was an error connecting to Salesforce.  Check your login credentials.");
+    drupal_set_message(t("There was an error connecting to Salesforce.  Check your login credentials."));
   }
 }
 
@@ -95,7 +95,7 @@ function salesforcewebform_fields_salesforce_api_describeSObjects($types) {
     $types = array($types);
   }
   if (!is_array($types)) {
-    drupal_set_message(t('DescribeSObjects expects an array. ' . gettype($types) . ' received.'), 'error');
+    drupal_set_message(t('DescribeSObjects expects an array. @type received.', array('@type' => check_plain(gettype($types)))), 'error');
     return FALSE;
   }
 
@@ -123,13 +123,13 @@ function salesforcewebform_fields_salesforce_api_describeSObjects($types) {
     $loginResult = $sf->login($userName, $password);
     if ($sf === FALSE) {
       $link = l('Please verify that you have completed your SalesForce credentials', SALESFORCE_PATH_ADMIN);
-      drupal_set_message(t('Unable to connect to SalesForce. !link', array('!link' => $link)), 'error');
+      drupal_set_message(t('Unable to connect to SalesForce. !link', array('!link' => check_url($link))), 'error');
       return;
     }
     $objects = $sf->describeSObjects(array_values($types));
   }
   catch (Exception $e) {
-    drupal_set_message("There was an error trying to connect to Salesforce.  Check your login credentials and/or the services this account is able to use (Enterprise, Unlimited, etc). Contact Salesforce to find out why you cannot access this API.");
+    drupal_set_message(t("There was an error trying to connect to Salesforce.  Check your login credentials and/or the services this account is able to use (Enterprise, Unlimited, etc). Contact Salesforce to find out why you cannot access this API."));
     return;
     //DrupalSalesforce::watchdog(SALESFORCE_LOG_SOME, 'Unable to establish Salesforce connection while issuing describeSObjects API call.', array(), WATCHDOG_ERROR);
   }
