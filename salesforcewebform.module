@@ -378,7 +378,7 @@ function salesforcewebform_process_data($node, $submission, $compmap) {
   }
   //Take the submission data and put it into the format of SFFieldName=>Value; if multiple values are set, string them together.
   foreach ($submission->data as $fkey => $fvalue) {
-    if (isset($compmap[$fkey])) {
+    if (isset($compmap[$fkey]) && $compmap[$fkey] != "webformsid__c") {
       $sffields = salesforcewebform_fields_salesforcewebform_fields($object_typecode);
       if ((in_array($compmap[$fkey], array_keys(array_change_key_case($sffields)))  && !is_numeric($compmap[$fkey])) && isset($fvalue['value'][0])) {
         if (count($fvalue['value']) == 1) {
