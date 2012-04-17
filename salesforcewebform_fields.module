@@ -58,7 +58,7 @@ function salesforcewebform_fields_salesforcewebform_fields($form_sfobject_typeco
 function salesforcewebform_fields_salesforce_api_connect() {
   //Get the path to the Toolkit, set in the options on install.
   $toolkit_path = variable_get('salesforcewebform_toolkit_path', drupal_get_path('module', 'salesforcewebform') . "/includes");
-  //Ok, now use SOAP to send the information to SalesForce
+  //Ok, now use SOAP to send the information to Salesforce
   //require_once($toolkit_path .'/soapclient/SforcePartnerClient.php');
   require_once(DRUPAL_ROOT . '/' . $toolkit_path . '/soapclient/SforceEnterpriseClient.php');
   require_once(DRUPAL_ROOT . '/' . $toolkit_path . '/soapclient/SforceHeaderOptions.php');
@@ -122,8 +122,8 @@ function salesforcewebform_fields_salesforce_api_describeSObjects($types) {
     //$sf->createConnection();
     $loginResult = $sf->login($userName, $password);
     if ($sf === FALSE) {
-      $link = l('Please verify that you have completed your SalesForce credentials', SALESFORCE_PATH_ADMIN);
-      drupal_set_message(t('Unable to connect to SalesForce. !link', array('!link' => check_url($link))), 'error');
+      $link = l('Please verify that you have completed your Salesforce credentials', SALESFORCE_PATH_ADMIN);
+      drupal_set_message(t('Unable to connect to Salesforce. !link', array('!link' => check_url($link))), 'error');
       return;
     }
     $objects = $sf->describeSObjects(array_values($types));
@@ -137,7 +137,7 @@ function salesforcewebform_fields_salesforce_api_describeSObjects($types) {
     return array();
   }
 
-  // This is the normalization part: If only one object was described, SalesForce
+  // This is the normalization part: If only one object was described, Salesforce
   // returned an object instead of an array. ALWAYS return an array of objects.
   if (is_object($objects)) {
     $objects = array($objects);
