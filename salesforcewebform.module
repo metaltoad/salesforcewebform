@@ -71,7 +71,7 @@ function salesforcewebform_form_alter(&$form, &$form_state, $form_id) {
         1 => t('Yes'),
         0 => t('No'),
       ),
-      '#description' => t('If yes, the form will be sent via SOAP to SalesForce.  Make sure you have specified the username & password in Administer->Site Configuration->SalesForce Webform first.'),
+      '#description' => t('If yes, the form will be sent via SOAP to SalesForce.  Make sure you have specified the username & password in the !sflink first.', array('!sflink' => l('Salesforce Webform settings', 'admin/config/development/salesforcewebform'))),
       '#default_value' => (isset($node->use_salesforce)) ? $node->use_salesforce : 0,
     );
 
