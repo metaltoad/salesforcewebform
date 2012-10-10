@@ -1,3 +1,10 @@
+About:
+------------
+This repo is a fork of http://git.drupal.org/project/salesforcewebform.git
+see http://drupal.org/project/salesforcewebform
+It is maintained by Metal Toad Media for the purpose of centralizing 
+a patched version of the module for inclusion in Drupal sites as a git submodule.
+
 
 Description:
 ------------
